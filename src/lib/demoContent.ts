@@ -139,7 +139,7 @@ const SEEDS: DemoSeed[] = [
         "## 4. Wer bearbeitet die Bestellungen?",
         "Die unspektakulärste und wichtigste Frage. Eine Bestellung, die drei Tage liegt, weil im Laden Betrieb war, kostet Sie den Kunden. Wenn es keine Antwort darauf gibt, ist der Shop noch nicht bereit, unabhängig davon, wie gut er gebaut ist.",
         "## Ein guter Zwischenschritt",
-        "Wenn Sie bei zwei der vier Fragen zögern: eine Seite, die Ihr Sortiment mit Preisen und Verfügbarkeit **zeigt**, ohne zu verkaufen. Das bringt einen großen Teil des Nutzens ohne Zahlungsabwicklung, Versandkosten und tägliche Bestellbearbeitung, und ist die Grundlage, auf der ein echter Shop später aufsetzt.",
+        "Wenn Sie bei zwei der vier Fragen zögern: eine Seite, die Ihr Sortiment mit Preisen und Verfügbarkeit **zeigt**, ohne zu verkaufen. Das bringt einen großen Teil des Nutzens ohne Zahlungsabwicklung, Versandkosten und tägliche Bestellbearbeitung und ist die Grundlage, auf der ein echter Shop später aufsetzt.",
       ].join("\n\n"),
     },
     en: {
