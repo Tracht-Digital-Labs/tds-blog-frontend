@@ -41,7 +41,7 @@ describe("otherLang", () => {
   });
 });
 
-describe("tagAlternate — derived from the translated articles", () => {
+describe("tagAlternate, derived from the translated articles", () => {
   const de = [
     { slug: "a", tags: "digitalisierung,prozesse" },
     { slug: "b", tags: "digitalisierung,excel" },
@@ -191,7 +191,7 @@ describe("archiveAlternate", () => {
     await expect(archiveAlternate("de", 7)).resolves.toBeNull();
   });
 
-  it("never mirrors page 1 — it is the home page, not an archive URL", async () => {
+  it("never mirrors page 1, it is the home page, not an archive URL", async () => {
     await expect(archiveAlternate("de", 1)).resolves.toBeNull();
     await expect(archiveAlternate("de", 0)).resolves.toBeNull();
     await expect(archiveAlternate("de", 2.5)).resolves.toBeNull();

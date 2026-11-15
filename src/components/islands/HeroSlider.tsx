@@ -133,7 +133,7 @@ function Slide({ posts, meta, lang, t }: { posts: SliderPost[]; meta: SetMeta; l
             narrow two-column hero (768px) the items used to break inside
             themselves ("Julian / Tracht", "7. Oktober / 2026"). */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", columnGap: 18, rowGap: 8, marginTop: 18, whiteSpace: "nowrap" }}>
-          <AuthorChip inverse name={lead.author?.name ?? fallbackAuthorName(lang)} avatarUrl={lead.author?.avatarUrl} />
+          <AuthorChip inverse name={lead.author?.name ?? fallbackAuthorName(lang)} avatarUrl={lead.author?.avatarUrl} lang={lang} />
           {bookLabel(lead.readingMinutes, lang) && (
             <span className="tabular hidden sm:inline" style={{ fontSize: 13, color: "rgba(255,255,255,.55)" }}>
               {bookLabel(lead.readingMinutes, lang)}

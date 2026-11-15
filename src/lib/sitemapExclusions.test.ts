@@ -70,7 +70,7 @@ describe("hreflangGroup", () => {
     expect(hreflangGroup("/en/author/julian")).toEqual(["/autor/julian", "/en/author/julian"]);
   });
 
-  it("leaves the tag segment alone — it is the same word in both trees", () => {
+  it("leaves the tag segment alone, it is the same word in both trees", () => {
     expect(hreflangGroup("/tag/steuern")).toEqual(["/tag/steuern", "/en/tag/steuern"]);
   });
 

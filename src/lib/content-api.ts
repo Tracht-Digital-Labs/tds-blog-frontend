@@ -153,7 +153,7 @@ export async function listAllPosts(lang?: "de" | "en"): Promise<ListResponse["po
       if (err instanceof Error && err.name === "SiteKeyRejectedError") return [];
       throw err;
     }
-    console.warn("[tds-blog] content-api unreachable — serving demo posts:", err);
+    console.warn("[tds-blog] content-api unreachable, serving demo posts:", err);
     return demoPostList(lang);
   }
 }
@@ -225,7 +225,7 @@ export async function listPopular(lang: "de" | "en", limit = 6): Promise<ListRes
     // A side tab, not the page: an erroring API leaves it empty rather than
     // filling it with demo posts.
     if (!isConnectionFailure(err)) return [];
-    console.warn("[tds-blog] content-api unreachable — serving demo popular:", err);
+    console.warn("[tds-blog] content-api unreachable, serving demo popular:", err);
     return demoPostList(lang).slice(0, limit);
   }
 }
@@ -251,7 +251,7 @@ export async function listTopics(lang: "de" | "en"): Promise<TopicsBlock | null>
     if (!isConnectionFailure(err)) return null; // reachable but 404/5xx → no curated topics
     // Host unreachable at build time → demo block (keeps a local/no-API
     // build from rendering an empty section), same as listAllPosts.
-    console.warn("[tds-blog] content-api unreachable — serving demo topics:", err);
+    console.warn("[tds-blog] content-api unreachable, serving demo topics:", err);
     return demoTopics(lang);
   }
 }
@@ -309,7 +309,7 @@ export async function cookieBannerEnabled(): Promise<boolean> {
   try {
     return (await landingBlocks())?.["cookie_banner"]?.enabled === true;
   } catch (err) {
-    console.warn("[tds-blog] content-api unreachable — cookie banner off:", err);
+    console.warn("[tds-blog] content-api unreachable, cookie banner off:", err);
     return false;
   }
 }
@@ -347,7 +347,7 @@ export async function adsConfig(): Promise<AdsConfig> {
   try {
     block = (await landingBlocks())?.["ads"];
   } catch (err) {
-    console.warn("[tds-blog] content-api unreachable — ads off:", err);
+    console.warn("[tds-blog] content-api unreachable, ads off:", err);
     return ADS_OFF;
   }
 
@@ -419,7 +419,7 @@ export async function getPost(slug: string, lang: "de" | "en"): Promise<FullPost
     }
     // API down → serve the matching demo post (keeps demo slugs from
     // listAllPosts() renderable). Returns null for an unknown slug.
-    console.warn("[tds-blog] content-api unreachable — serving demo post:", err);
+    console.warn("[tds-blog] content-api unreachable, serving demo post:", err);
     return demoPost(slug, lang);
   }
 }

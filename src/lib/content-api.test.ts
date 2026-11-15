@@ -182,7 +182,7 @@ describe("landing blocks (cookie banner + ads)", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("does not remember a transport failure — the next read retries", async () => {
+  it("does not remember a transport failure, the next read retries", async () => {
     const fetchMock = vi
       .fn()
       .mockRejectedValueOnce(new Error("ENOTFOUND"))

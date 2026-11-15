@@ -87,7 +87,7 @@ async function call(
     if (!res.ok) {
       // NOT remembered: a 429 or 5xx is transient, and caching the null pinned
       // the untranslated text for as long as the entry lived.
-      console.warn(`[tds-blog] DeepL ${res.status} — falling back to source text`);
+      console.warn(`[tds-blog] DeepL ${res.status}, falling back to source text`);
       return null;
     }
     const data = (await res.json()) as { translations?: Array<{ text: string }> };
@@ -95,7 +95,7 @@ async function call(
     remember(cacheKey, out);
     return out;
   } catch (err) {
-    console.warn("[tds-blog] DeepL request failed — falling back to source:", err);
+    console.warn("[tds-blog] DeepL request failed, falling back to source:", err);
     return null;
   }
 }

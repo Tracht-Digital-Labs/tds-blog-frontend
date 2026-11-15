@@ -25,10 +25,10 @@ const COPY = {
   de: {
     eyebrow: "Newsletter",
     title: "Digitalisierung, einmal im Monat.",
-    body: "Neue Artikel, Praxisbeispiele und Werkzeuge für den Mittelstand — direkt in Ihr Postfach. Kein Spam, jederzeit abbestellbar.",
+    body: "Neue Artikel, Praxisbeispiele und Werkzeuge für den Mittelstand, direkt in Ihr Postfach. Kein Spam, jederzeit abbestellbar.",
     placeholder: "Ihre E-Mail-Adresse",
     cta: "Anmelden",
-    done: "Vielen Dank — wir haben Ihre Anmeldung erhalten und melden uns in Kürze.",
+    done: "Vielen Dank, wir haben Ihre Anmeldung erhalten und melden uns in Kürze.",
     error: "Das hat leider nicht geklappt. Bitte versuchen Sie es später noch einmal.",
     legal:
       "Mit dem Absenden stimmen Sie zu, dass wir Sie per E-Mail kontaktieren. Abmeldung jederzeit möglich.",
@@ -37,10 +37,10 @@ const COPY = {
   en: {
     eyebrow: "Newsletter",
     title: "Digitalization, once a month.",
-    body: "New articles, case studies and tools for SMEs — straight to your inbox. No spam, unsubscribe anytime.",
+    body: "New articles, case studies and tools for SMEs, straight to your inbox. No spam, unsubscribe anytime.",
     placeholder: "Your email address",
     cta: "Subscribe",
-    done: "Thank you — we received your signup and will be in touch shortly.",
+    done: "Thank you, we received your signup and will be in touch shortly.",
     error: "That didn't work. Please try again later.",
     legal: "By submitting you agree that we may contact you by email. Unsubscribe anytime.",
     message: "Newsletter signup via the Ratgeber (blog.tracht-digital.de).",

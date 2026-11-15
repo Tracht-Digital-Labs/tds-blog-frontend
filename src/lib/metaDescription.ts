@@ -50,7 +50,7 @@ export function categoryDescription(name: string, lang: Lang): string {
         `Alle Beiträge im Ratgeber zur Kategorie „${name}“.`,
       )
     : fit(
-        `Posts in the Ratgeber filed under “${name}” — hands-on articles on web development, automation and software for businesses.`,
+        `Posts in the Ratgeber filed under “${name}”, hands-on articles on web development, automation and software for businesses.`,
         `All posts in the Ratgeber filed under “${name}”.`,
       );
 }
@@ -58,11 +58,11 @@ export function categoryDescription(name: string, lang: Lang): string {
 export function tagDescription(tag: string, lang: Lang): string {
   return lang === "de"
     ? fit(
-        `Alle Beiträge im Ratgeber mit dem Tag „${tag}“ — praxisnahe Artikel über Digitalisierung und Software-Entwicklung für Unternehmen.`,
+        `Alle Beiträge im Ratgeber mit dem Tag „${tag}“, praxisnahe Artikel über Digitalisierung und Software-Entwicklung für Unternehmen.`,
         `Alle Beiträge im Ratgeber mit dem Tag „${tag}“.`,
       )
     : fit(
-        `All posts in the Ratgeber tagged “${tag}” — hands-on articles on digitalization and software development for businesses.`,
+        `All posts in the Ratgeber tagged “${tag}”, hands-on articles on digitalization and software development for businesses.`,
         `All posts in the Ratgeber tagged “${tag}”.`,
       );
 }
@@ -80,11 +80,11 @@ export function archiveDescription(page: number, lang: Lang): string {
 export function authorDescription(name: string, lang: Lang): string {
   return lang === "de"
     ? fit(
-        `Beiträge von ${name} im Ratgeber — Artikel über Digitalisierung für Unternehmen, Webentwicklung und Automatisierung.`,
+        `Beiträge von ${name} im Ratgeber: Artikel über Digitalisierung für Unternehmen, Webentwicklung und Automatisierung.`,
         `Beiträge von ${name} im Ratgeber von Tracht Digital Solutions.`,
       )
     : fit(
-        `Posts by ${name} in the Ratgeber — articles on digitalization for businesses, web development and automation.`,
+        `Posts by ${name} in the Ratgeber, articles on digitalization for businesses, web development and automation.`,
         `Posts by ${name} in the Tracht Digital Solutions journal.`,
       );
 }
@@ -130,7 +130,7 @@ export function postDescription(
   // Long enough that the result clears the floor even from nothing at all.
   const topUp =
     lang === "de"
-      ? "Aus dem Ratgeber von Tracht Digital Solutions — Artikel über Digitalisierung für Unternehmen."
-      : "From the Ratgeber by Tracht Digital Solutions — articles on digitalization for businesses.";
+      ? "Aus dem Ratgeber von Tracht Digital Solutions: Artikel über Digitalisierung für Unternehmen."
+      : "From the Ratgeber by Tracht Digital Solutions, articles on digitalization for businesses.";
   return clampToWord(chosen ? `${chosen} ${topUp}` : topUp);
 }

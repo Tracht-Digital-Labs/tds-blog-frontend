@@ -48,7 +48,7 @@ function pointer(el: Element, type: string, clientX: number) {
 
 afterEach(cleanup);
 
-describe("HeroSlider — pointer capture", () => {
+describe("HeroSlider, pointer capture", () => {
   /**
    * The defect: `setPointerCapture` on pointerdown makes the browser dispatch
    * the trailing `click` at the capture element instead of the element under
@@ -79,7 +79,7 @@ describe("HeroSlider — pointer capture", () => {
   });
 });
 
-describe("HeroSlider — links", () => {
+describe("HeroSlider, links", () => {
   it("points the headline, the cover and the CTA at the article", () => {
     render(<HeroSlider latest={posts} popular={[]} lang="de" />);
     const hrefs = Array.from(document.querySelectorAll<HTMLAnchorElement>("a")).map((a) => a.getAttribute("href"));

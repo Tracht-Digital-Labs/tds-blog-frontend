@@ -185,7 +185,7 @@ const showConsent =
 
 <!DOCTYPE html>
 <!-- data-surface selects the geometry layer from tds-shared's design
-     library (surfaces/blog.css): the flat "kantig" kit — every radius 0,
+     library (surfaces/blog.css): the flat "kantig" kit, every radius 0,
      no elevation, the 800 display voice, --tds-flat-tint/-hover. Do not
      author radii locally; that is what made this repo fork .chip,
      .display, .display-tight and .eyebrow in the first place. -->
@@ -279,7 +279,7 @@ const showConsent =
     )}
     <link rel="alternate" type="application/rss+xml" title="Ratgeber von Tracht Digital Solutions" href={rssHref} />
 
-    <!-- Resource hints — open early connections to the API origin
+    <!-- Resource hints, open early connections to the API origin
          (content-api at build time, in case any runtime asset
          resolves to it) and the sibling marketing site. -->
     <link rel="preconnect" href="https://api.tracht-digital.de" crossorigin />
@@ -468,8 +468,8 @@ const showConsent =
         layout, etc). */}
     <script>
       const ORIGINAL_TITLE = document.title;
-      const BRAND = ORIGINAL_TITLE.includes(" — ")
-        ? ORIGINAL_TITLE.split(" — ")[0]
+      const BRAND = ORIGINAL_TITLE.includes(" | ")
+        ? ORIGINAL_TITLE.split(" | ")[0]
         : ORIGINAL_TITLE;
 
       const sections = document.querySelectorAll<HTMLElement>("section[id]");

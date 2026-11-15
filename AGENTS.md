@@ -31,6 +31,7 @@ npm run audit:geo -- <url>
 - No price on embedded products; never rebuild an affiliate URL.
 - Never `setPointerCapture` on `pointerdown` in the hero slider.
 - Font faces are JS imports in `Layout.astro`; the OG renderer stays build-time only.
+- Follows the TDS quality standard (`../tds-ops/standards/quality.md`): no AI slop, clean code.
 
 ## Topic files
 

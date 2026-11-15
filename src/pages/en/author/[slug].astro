@@ -97,7 +97,7 @@ const cards = posts.map((p) => ({
 ---
 
 <Layout
-  title={pageTitle(`${author.name} — author`)}
+  title={pageTitle(`${author.name} | author`)}
   description={description}
   lang="en"
   jsonLd={jsonLd}
@@ -116,7 +116,7 @@ const cards = posts.map((p) => ({
           {author.avatarUrl ? (
             <img
               src={author.avatarUrl}
-              alt=""
+              alt={`Portrait of ${author.name}`}
               width="80"
               height="80"
               class="w-20 h-20 rounded-full object-cover shrink-0"

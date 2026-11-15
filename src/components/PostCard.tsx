@@ -50,17 +50,19 @@ export function AuthorChip({
   inverse,
   name = "Tracht Digital",
   avatarUrl,
+  lang = "de",
 }: {
   inverse?: boolean;
   name?: string;
   avatarUrl?: string | null;
+  lang?: "de" | "en";
 }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
       {avatarUrl ? (
         <img
           src={avatarUrl}
-          alt=""
+          alt={lang === "de" ? `Porträt von ${name}` : `Portrait of ${name}`}
           width={28}
           height={28}
           style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }}
@@ -167,6 +169,7 @@ export default function PostCard({
           <AuthorChip
             name={post.author?.name ?? fallbackAuthorName(lang)}
             avatarUrl={post.author?.avatarUrl}
+            lang={lang}
           />
           <BookMeta minutes={post.readingMinutes} lang={lang} />
         </div>

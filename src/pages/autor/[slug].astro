@@ -99,7 +99,7 @@ const cards = posts.map((p) => ({
 ---
 
 <Layout
-  title={pageTitle(`${author.name} — Autor`)}
+  title={pageTitle(`${author.name} | Autor`)}
   description={description}
   jsonLd={jsonLd}
   altUrl={altPath ? new URL(altPath, siteConfig.url).toString() : null}
@@ -118,7 +118,7 @@ const cards = posts.map((p) => ({
           {author.avatarUrl ? (
             <img
               src={author.avatarUrl}
-              alt=""
+              alt={`Porträt von ${author.name}`}
               width="80"
               height="80"
               class="w-20 h-20 rounded-full object-cover shrink-0"

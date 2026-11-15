@@ -30,13 +30,13 @@ const root = path.resolve(__dirname, "../..");
 
 describe("pageTitle", () => {
   it("appends the brand when the whole thing fits", () => {
-    expect(pageTitle("Webshop")).toBe("Webshop — Ratgeber");
+    expect(pageTitle("Webshop")).toBe("Webshop | Ratgeber");
     expect(pageTitle("Webshop").length).toBeLessThanOrEqual(RENDERED_TITLE_LENGTH);
   });
 
   it("drops the brand rather than the subject when it does not fit", () => {
     // A real seeded title: 66 characters before any suffix.
-    const long = "Fünf Dinge, die auf fast jeder Unternehmenswebsite fehlen — und wie";
+    const long = "Fünf Dinge, die auf fast jeder Unternehmenswebsite fehlen, und wie";
     const title = pageTitle(long);
     expect(title).toBe(long);
     expect(title).not.toContain("— Ratgeber");
@@ -53,13 +53,13 @@ describe("pageTitle", () => {
   });
 
   it("normalises whitespace and survives an empty subject", () => {
-    expect(pageTitle("  Zwei   Wörter  ")).toBe("Zwei Wörter — Ratgeber");
+    expect(pageTitle("  Zwei   Wörter  ")).toBe("Zwei Wörter | Ratgeber");
     expect(pageTitle("   ")).toBe(siteConfig.blogName.de);
   });
 
-  it("keeps the ' — ' separator the tab script splits on", () => {
+  it("keeps the ': ' separator the tab script splits on", () => {
     // Layout.astro's scroll script derives the brand by splitting on " — ".
-    expect(pageTitle("Webshop")).toContain(" — ");
+    expect(pageTitle("Webshop")).toContain(" | ");
   });
 });
 
@@ -343,7 +343,7 @@ describe("collectionPageSchema", () => {
     const itemList = itemListSchema(["https://x/a", "https://x/b"], 11);
     const schema = collectionPageSchema({
       url: "https://blog.tracht-digital.de/kategorie/webshop",
-      name: "Webshop — Ratgeber",
+      name: "Webshop: Ratgeber",
       description: "Beiträge zur Kategorie Webshop.",
       lang: "de",
       itemList,

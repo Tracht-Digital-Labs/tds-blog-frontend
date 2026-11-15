@@ -67,7 +67,7 @@ export function renderLlmsTxt(input: LlmsInput): string {
 
   out("# Ratgeber von Tracht Digital Solutions");
   out();
-  out("> Notizen aus der Werkstatt — Artikel von Julian Tracht (Tracht Digital");
+  out("> Notizen aus der Werkstatt: Artikel von Julian Tracht (Tracht Digital");
   out("> Solutions) über Software, Auftraggeber und das, was zwischen den beiden");
   out("> passiert. Deutsch und Englisch, dieselben Artikel in beiden Sprachen, wo");
   out("> eine Übersetzung existiert.");
@@ -132,7 +132,7 @@ export function renderLlmsTxt(input: LlmsInput): string {
     out("## Themen (nur Englisch)");
     out();
     for (const [category, count] of [...englishOnly].sort((a, b) => b[1] - a[1])) {
-      out(`- **${category}** (${count}) — ${absolute(categoryHref("en", categorySlug(category)))}`);
+      out(`- **${category}** (${count}): ${absolute(categoryHref("en", categorySlug(category)))}`);
     }
     out();
   }
@@ -144,7 +144,7 @@ export function renderLlmsTxt(input: LlmsInput): string {
     out();
     for (const post of shown) {
       const date = post.publishedAt ? post.publishedAt.slice(0, 10) : "ohne Datum";
-      out(`- **${post.title}** (${date}, ${post.category}) — ${post.excerpt}`);
+      out(`- **${post.title}** (${date}, ${post.category}): ${post.excerpt}`);
       const twin = byEnSlug.get(post.slug);
       out(
         `  ${postUrl(post.slug, "de")}` +
@@ -166,7 +166,7 @@ export function renderLlmsTxt(input: LlmsInput): string {
     out("## Nur auf Englisch");
     out();
     for (const post of onlyEnglish) {
-      out(`- **${post.title}** — ${postUrl(post.slug, "en")}`);
+      out(`- **${post.title}**: ${postUrl(post.slug, "en")}`);
     }
     out();
   }

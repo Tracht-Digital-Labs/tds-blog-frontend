@@ -56,7 +56,7 @@ const t =
     : { readUnit: "min read", by: "By", tagsLabel: "Topics", view: "Print view" };
 ---
 
-<Layout title={`${post.title} — ${t.view}`} description={post.excerpt} lang={lang} bare noindex>
+<Layout title={`${post.title} | ${t.view}`} description={post.excerpt} lang={lang} bare noindex>
   <div class="print-shell">
     {/* Screen-only controls; hidden by `@media print`. */}
     <aside class="print-controls">
