@@ -1,4 +1,4 @@
-import { imageRights } from "@tracht-digital-solutions/tds-shared/site";
+import { imageRights } from "@tracht-digital-labs/tds-shared/site";
 import { imageObject } from "./imageCatalog";
 /**
  * Schema.org JSON-LD generators for the journal.

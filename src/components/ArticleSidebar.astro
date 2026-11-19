@@ -16,8 +16,8 @@
  * lives under `sidebar-hide-collapsed`, so the collapsed icon rail stays
  * the same minimal toggle + theme + CTA.
  */
-import { themeToggleMarkup } from "@tracht-digital-solutions/tds-shared/dom";
-import { propertyContact } from "@tracht-digital-solutions/tds-shared/nav";
+import { themeToggleMarkup } from "@tracht-digital-labs/tds-shared/dom";
+import { propertyContact } from "@tracht-digital-labs/tds-shared/nav";
 import {
   primaryNav,
   isActiveNav,
@@ -142,8 +142,8 @@ const contact = propertyContact(lang);
 </aside>
 
 <script>
-  import { writePrefs } from "@tracht-digital-solutions/tds-shared/prefs";
-  import { mountPreferenceControls } from "@tracht-digital-solutions/tds-shared/app";
+  import { writePrefs } from "@tracht-digital-labs/tds-shared/prefs";
+  import { mountPreferenceControls } from "@tracht-digital-labs/tds-shared/app";
 
   const aside = document.getElementById("article-sidebar");
   if (aside) mountPreferenceControls(aside);

@@ -5,7 +5,7 @@
  * the articles this device kept for offline reading — straight from the
  * worker's page cache, so the reader always has somewhere to go.
  */
-import { SW_PAGE_CACHE } from "@tracht-digital-solutions/tds-shared/pwa";
+import { SW_PAGE_CACHE } from "@tracht-digital-labs/tds-shared/pwa";
 
 interface Props {
   lang: "de" | "en";
@@ -61,7 +61,7 @@ const t = lang === "de"
 </style>
 
 <script>
-  import { mountOfflineList } from "@tracht-digital-solutions/tds-shared/pwa";
+  import { mountOfflineList } from "@tracht-digital-labs/tds-shared/pwa";
 
   // The worker's page cache: every entry is a page this device kept, titled
   // from its <title> minus the site suffix (tds-shared helper). The default

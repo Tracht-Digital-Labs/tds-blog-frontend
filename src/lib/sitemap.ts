@@ -25,7 +25,7 @@ import { categorySlug } from "./taxonomy";
 import { isIndexedTag } from "./tagIndexing";
 import { siteConfig } from "./seo";
 import { exclusionPatterns, groupExcluded, hreflangGroup } from "./sitemapExclusions";
-import { renderSectionedSitemapIndex, renderUrlset as renderUrlsetXml } from "@tracht-digital-solutions/tds-shared/site";
+import { renderSectionedSitemapIndex, renderUrlset as renderUrlsetXml } from "@tracht-digital-labs/tds-shared/site";
 import { SITEMAP_SECTIONS, sectionPath, type SitemapSection } from "./sitemapSections";
 
 const PREFIX: Record<Lang, string> = { de: "", en: "/en" };

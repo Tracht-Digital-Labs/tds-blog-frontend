@@ -15,24 +15,24 @@
 | Node.js | 22.22+ | Astro 7 needs 22.12; jsdom 30 + vitest 4 raise it to `^22.22.2 || ^24.15.0 || >=26` |
 | npm | 10+ | Bundled with Node 22 |
 | Git | any | Repo hosting |
-| Classic GitHub PAT | with `read:packages` | Install `@tracht-digital-solutions/tds-shared` |
+| Classic GitHub PAT | with `read:packages` | Install `@tracht-digital-labs/tds-shared` |
 
 ## 1. GitHub Packages access
 
 ```ini
 # ~/.npmrc
-@tracht-digital-solutions:registry=https://npm.pkg.github.com
+@tracht-digital-labs:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=ghp_yourClassicPATWithReadPackagesScope
 ```
 
 …or set `NPM_TOKEN` in the env (the repo's `.npmrc` references it).
 For the 403 on `read_package`, see
-[tds-shared-pkg INSTALL §5](https://github.com/Tracht-Digital-Solutions/tds-shared-pkg/blob/main/INSTALL.md).
+[tds-shared-pkg INSTALL §5](https://github.com/Tracht-Digital-Labs/tds-shared-pkg/blob/main/INSTALL.md).
 
 ## 2. Clone + install
 
 ```bash
-git clone https://github.com/Tracht-Digital-Solutions/tds-blog-frontend.git
+git clone https://github.com/Tracht-Digital-Labs/tds-blog-frontend.git
 cd tds-blog-frontend
 npm install
 ```
@@ -134,7 +134,7 @@ When `tds-admin` publishes a post, `tds-content-api` fires a
 `workflow_dispatch` against this repo's `dev.yml` so the new post + its OG image
 land on the `dev` branch automatically (production picks it up on the next
 manual Release). Implementation lives in
-[`tds-content-api#3`](https://github.com/Tracht-Digital-Solutions/tds-content-api/issues/3).
+[`tds-content-api#3`](https://github.com/Tracht-Digital-Labs/tds-content-api/issues/3).
 Until then, push a trivial commit to this repo's main, or hit "Run
 workflow" in the Actions tab.
 
@@ -189,8 +189,8 @@ konfiguriert aber nur die Laufzeit.
 
 ## Related repos
 
-- [tds-shared-pkg](https://github.com/Tracht-Digital-Solutions/tds-shared-pkg) — `BlogPost` type, i18n strings
-- [tds-content-api](https://github.com/Tracht-Digital-Solutions/tds-content-api) — post source, fetched at build time
+- [tds-shared-pkg](https://github.com/Tracht-Digital-Labs/tds-shared-pkg) — `BlogPost` type, i18n strings
+- [tds-content-api](https://github.com/Tracht-Digital-Labs/tds-content-api) — post source, fetched at build time
 
 ## Troubleshooting
 

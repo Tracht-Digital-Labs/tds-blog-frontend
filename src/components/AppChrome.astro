@@ -15,7 +15,7 @@
  * "Mehr" holds the settings — on an article the reading controls, then theme
  * (icons), language — and the sibling sites as one joined row of buttons.
  */
-import { propertyContact, propertyNav } from "@tracht-digital-solutions/tds-shared/nav";
+import { propertyContact, propertyNav } from "@tracht-digital-labs/tds-shared/nav";
 import { entdeckenLabels, categoryHref, tagHref, topicsHref } from "~/lib/nav";
 import { getTaxonomy } from "~/lib/taxonomy";
 import { corpus } from "~/lib/routes";
@@ -335,7 +335,7 @@ const enHref = de ? altHref : path;
 </style>
 
 <script>
-  import { mountAppTabBar, mountLiveFilter, mountPreferenceControls, mountTabPages } from "@tracht-digital-solutions/tds-shared/app";
+  import { mountAppTabBar, mountLiveFilter, mountPreferenceControls, mountTabPages } from "@tracht-digital-labs/tds-shared/app";
 
   const bar = document.getElementById("app-tabbar");
   if (bar) {

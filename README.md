@@ -55,12 +55,12 @@ Deploys automatically on every push to `main`; see [Deploy](#deploy).
 
 ### GitHub Packages authentication
 
-`@tracht-digital-solutions/tds-shared` lives on GitHub Packages.
+`@tracht-digital-labs/tds-shared` lives on GitHub Packages.
 Classic PAT with `read:packages` scope required. Either:
 
 ```ini
 # ~/.npmrc
-@tracht-digital-solutions:registry=https://npm.pkg.github.com
+@tracht-digital-labs:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=ghp_yourPAT
 ```
 
@@ -123,7 +123,7 @@ When `tds-admin` publishes a post, `tds-content-api` should fire a
 `workflow_dispatch` against this repo's `build.yml` so the blog
 rebuilds with the new post (which will then appear on the `build`
 branch ready to deploy). Implementation lives in
-[`tds-content-api#3`](https://github.com/Tracht-Digital-Solutions/tds-content-api/issues/3)
+[`tds-content-api#3`](https://github.com/Tracht-Digital-Labs/tds-content-api/issues/3)
 (still pending).
 
 ---

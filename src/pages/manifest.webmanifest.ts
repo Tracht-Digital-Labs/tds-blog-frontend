@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { buildManifest, MANIFEST_HEADERS } from "@tracht-digital-solutions/tds-shared/pwa";
+import { buildManifest, MANIFEST_HEADERS } from "@tracht-digital-labs/tds-shared/pwa";
 
 /**
  * The web app manifest: makes the journal installable ("Zum Home-Bildschirm"),

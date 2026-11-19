@@ -21,7 +21,7 @@
  * API during dev.
  */
 
-import type { BlogPost, AdsMode } from "@tracht-digital-solutions/tds-shared";
+import type { BlogPost, AdsMode } from "@tracht-digital-labs/tds-shared";
 import { contentCache } from "./cache";
 import { DEMO_MODE, demoPost, demoPostList, demoTopics, type TopicsBlock } from "./demoContent";
 import { contentApiBase } from "./connection";

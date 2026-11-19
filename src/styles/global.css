@@ -35,16 +35,16 @@
    The old repo rule was "geometry is app-local per repo convention —
    don't 'fix' this in tds-shared-pkg". That rule is gone: it is precisely
    what let one design drift into three separately-maintained variations. */
-@import "@tracht-digital-solutions/tds-shared/styles/base.css";
-@import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
-@import "@tracht-digital-solutions/tds-shared/styles/prose.css";
+@import "@tracht-digital-labs/tds-shared/styles/base.css";
+@import "@tracht-digital-labs/tds-shared/styles/primitives.css";
+@import "@tracht-digital-labs/tds-shared/styles/prose.css";
 /* Cross-page fade between two pages of the blog — no script, opacity only,
    off under reduced motion. See "No decorative motion" in AGENTS.md for why
    it is kept. */
-@import "@tracht-digital-solutions/tds-shared/styles/page-transitions.css";
-@import "@tracht-digital-solutions/tds-shared/styles/app-shell.css";
-@import "@tracht-digital-solutions/tds-shared/styles/app.css";
-@import "@tracht-digital-solutions/tds-shared/styles/surfaces/blog.css";
+@import "@tracht-digital-labs/tds-shared/styles/page-transitions.css";
+@import "@tracht-digital-labs/tds-shared/styles/app-shell.css";
+@import "@tracht-digital-labs/tds-shared/styles/app.css";
+@import "@tracht-digital-labs/tds-shared/styles/surfaces/blog.css";
 
 /* Tailwind ignores node_modules by default, and the shared React islands are
    built out of utility classes (`ThemeToggle` is
@@ -55,7 +55,7 @@
    happens to use them in its own markup. No error, no warning — it just looked
    wrong.
    MUST come after the @imports; `@source` before an `@import` is a build error. */
-@source "../../node_modules/@tracht-digital-solutions/tds-shared";
+@source "../../node_modules/@tracht-digital-labs/tds-shared";
 
 :root {
   /* width of the expanded article section-nav rail (right viewport edge) */

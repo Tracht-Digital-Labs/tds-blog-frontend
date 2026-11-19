@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { necessaryOnly } from "@tracht-digital-solutions/tds-shared/consent";
-import { writeConsent } from "@tracht-digital-solutions/tds-shared/consent/store";
+import { necessaryOnly } from "@tracht-digital-labs/tds-shared/consent";
+import { writeConsent } from "@tracht-digital-labs/tds-shared/consent/store";
 import { bumpInterests, readInterests, trackInterests as track } from "./interests";
 
 const cookie = () => readInterests(document.cookie);

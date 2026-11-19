@@ -40,7 +40,7 @@ describe("mobile navigation", () => {
   });
 
   it("takes the header mechanics from tds-shared", () => {
-    expect(source).toMatch(/from "@tracht-digital-solutions\/tds-shared\/app"/);
+    expect(source).toMatch(/from "@tracht-digital-labs\/tds-shared\/app"/);
     expect(source).toContain("mountAppHeader(header)");
   });
 
@@ -134,7 +134,7 @@ describe("the property bar", () => {
   });
 
   it("resolves the bar in the INSTALLED tds-shared", () => {
-    const shared = join(process.cwd(), "node_modules", "@tracht-digital-solutions", "tds-shared");
+    const shared = join(process.cwd(), "node_modules", "@tracht-digital-labs", "tds-shared");
     const primitives = readFileSync(join(shared, "styles", "primitives.css"), "utf8");
     expect(primitives).toContain(".tds-sitebar__wide");
     expect(primitives).toContain(".tds-sitebar__island");
@@ -156,7 +156,7 @@ describe("the account menu", () => {
 
   it("comes from tds-shared, not from a local copy", () => {
     expect(source).toMatch(
-      /import \{[^}]*\bAccountMenu\b[^}]*\} from "@tracht-digital-solutions\/tds-shared\/(?:components|islands\/account-menu)"/,
+      /import \{[^}]*\bAccountMenu\b[^}]*\} from "@tracht-digital-labs\/tds-shared\/(?:components|islands\/account-menu)"/,
     );
   });
 
@@ -205,7 +205,7 @@ describe("the account menu", () => {
     const dts = join(
       process.cwd(),
       "node_modules",
-      "@tracht-digital-solutions",
+      "@tracht-digital-labs",
       "tds-shared",
       "dist",
       "components",

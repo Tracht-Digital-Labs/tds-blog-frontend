@@ -9,7 +9,7 @@
  * Its own module, with no imports, because `cache.ts` needs the paths too and
  * must not pull the corpus readers in with them.
  */
-import { defineSitemapSections } from "@tracht-digital-solutions/tds-shared/site";
+import { defineSitemapSections } from "@tracht-digital-labs/tds-shared/site";
 
 const sections = defineSitemapSections(["pages", "posts", "categories", "tags", "authors"] as const);
 

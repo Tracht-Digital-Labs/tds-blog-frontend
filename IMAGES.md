@@ -71,7 +71,7 @@ post layout when present.
 
 ## Related
 
-See [`../tds-landingpage/IMAGES.md`](https://github.com/Tracht-Digital-Solutions/tds-landingpage-frontend/blob/main/IMAGES.md)
+See [`../tds-landingpage/IMAGES.md`](https://github.com/Tracht-Digital-Labs/tds-landingpage-frontend/blob/main/IMAGES.md)
 for the bigger image-swap guide — the OG-card Satori pipeline and
 favicon recommendations there apply 1:1 to this repo.
 

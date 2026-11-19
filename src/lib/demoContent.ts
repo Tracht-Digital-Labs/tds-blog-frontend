@@ -21,7 +21,7 @@
  * `lang: "en"`, so an English demo build rendered a German blog with no
  * warning anywhere.
  */
-import type { BlogPost } from "@tracht-digital-solutions/tds-shared";
+import type { BlogPost } from "@tracht-digital-labs/tds-shared";
 import { editorialCover } from './editorialCovers';
 
 export const DEMO_MODE = import.meta.env.PUBLIC_DEMO_MODE === "true";

@@ -3,7 +3,7 @@ import node from "@astrojs/node";
 import react from "@astrojs/react";
 // Shared CSS minify settings (incl. the cssTarget that keeps lightningcss
 // from dropping the .brand-header backdrop-filter prefix). See tds-shared#10.
-import { motionSsrNoExternal, tdsClientDirectives, tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
+import { motionSsrNoExternal, tdsClientDirectives, tdsViteBuild } from "@tracht-digital-labs/tds-shared/astro";
 
 export default defineConfig({
   site: "https://blog.tracht-digital.de",
@@ -52,7 +52,7 @@ export default defineConfig({
       // per transitive name if you bundle it; as a runtime dependency npm
       // resolves the tree in one step.
       noExternal: [
-        /^@tracht-digital-solutions\//,
+        /^@tracht-digital-labs\//,
         // NOTE @astrojs/rss is deliberately NOT bundled: it pulls a small
         // tree of XML packages, and adding them one at a time is a rebuild per
         // name. It is a public-registry package, so it ships in

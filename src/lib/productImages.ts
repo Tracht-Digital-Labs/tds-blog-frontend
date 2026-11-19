@@ -1,5 +1,5 @@
 import catalog from './productImages.json';
-import type {ShopProductRef as CatalogProduct} from "@tracht-digital-solutions/tds-shared/schemas";
+import type {ShopProductRef as CatalogProduct} from "@tracht-digital-labs/tds-shared/schemas";
 type Lang='de'|'en';
 
 interface ProductImage {slug:string;slugs:Record<Lang,string>;title:Record<Lang,string>;alt:Record<Lang,string>;width:number;height:number;src:string;digitalSourceType:string}

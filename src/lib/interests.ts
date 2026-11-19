@@ -1,4 +1,4 @@
-import { consentGranted, onConsentChange } from "@tracht-digital-solutions/tds-shared/consent/store";
+import { consentGranted, onConsentChange } from "@tracht-digital-labs/tds-shared/consent/store";
 
 /**
  * The reader's topic weights behind "Für dich" and the hero's personal tab.

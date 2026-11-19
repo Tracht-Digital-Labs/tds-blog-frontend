@@ -55,7 +55,7 @@ const codeOf = (file: string) => stripComments(readFileSync(file, "utf8"));
 const SHARED = join(
   process.cwd(),
   "node_modules",
-  "@tracht-digital-solutions",
+  "@tracht-digital-labs",
   "tds-shared",
   "styles",
 );

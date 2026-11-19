@@ -26,9 +26,9 @@
  * navigation this control does not implement. `aria-expanded` plus
  * `aria-controls` is the whole pattern.
  */
-import { AccountMenu } from "@tracht-digital-solutions/tds-shared/islands/account-menu";
-import { themeToggleMarkup } from "@tracht-digital-solutions/tds-shared/dom";
-import { propertyContact } from "@tracht-digital-solutions/tds-shared/nav";
+import { AccountMenu } from "@tracht-digital-labs/tds-shared/islands/account-menu";
+import { themeToggleMarkup } from "@tracht-digital-labs/tds-shared/dom";
+import { propertyContact } from "@tracht-digital-labs/tds-shared/nav";
 import {
   primaryNav,
   isActiveNav,
@@ -217,7 +217,7 @@ const currentFor = (node: { key: string; href: string }): "page" | "true" | unde
 <script>
   // NOT `is:inline` — an inline script is not bundled, so this import would
   // reach the browser as a bare specifier.
-  import { mountAppHeader, mountPreferenceControls } from "@tracht-digital-solutions/tds-shared/app";
+  import { mountAppHeader, mountPreferenceControls } from "@tracht-digital-labs/tds-shared/app";
 
   // Live search — bind the desktop search field (mobile has none).
   const inputs = document.querySelectorAll<HTMLInputElement>(".js-blog-search");

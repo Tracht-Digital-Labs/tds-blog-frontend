@@ -2,7 +2,7 @@ import {
   consentGranted,
   onConsentChange,
   openConsentSettings,
-} from "@tracht-digital-solutions/tds-shared/consent/store";
+} from "@tracht-digital-labs/tds-shared/consent/store";
 
 /**
  * Upgrade the consent gates in front of third-party video embeds.

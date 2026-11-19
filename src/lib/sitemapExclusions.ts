@@ -35,13 +35,13 @@
  * too, neither end would go red.
  */
 
-import { canonicalPath, createSitemapExclusions } from "@tracht-digital-solutions/tds-shared/site";
+import { canonicalPath, createSitemapExclusions } from "@tracht-digital-labs/tds-shared/site";
 import { memoisedOr, readContentJson } from "./contentFetch";
 import { contentApiBase } from "./connection";
 import { DEMO_MODE } from "./demoContent";
 import type { Lang } from "./routes";
 
-export { groupExcluded, matchesPattern } from "@tracht-digital-solutions/tds-shared/site";
+export { groupExcluded, matchesPattern } from "@tracht-digital-labs/tds-shared/site";
 
 /** This site's id in the panel's site registry. */
 export const SITE_ID = "blog";

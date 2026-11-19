@@ -1,8 +1,8 @@
 import { useState, type CSSProperties, type SubmitEvent } from "react";
 import { flushSync } from "react-dom";
-import { transitionUpdate } from "@tracht-digital-solutions/tds-shared/motion";
-import { Spinner } from "@tracht-digital-solutions/tds-shared/components";
-import { runtimeSetting } from "@tracht-digital-solutions/tds-shared/api";
+import { transitionUpdate } from "@tracht-digital-labs/tds-shared/motion";
+import { Spinner } from "@tracht-digital-labs/tds-shared/components";
+import { runtimeSetting } from "@tracht-digital-labs/tds-shared/api";
 
 /**
  * Newsletter block from the design-system blog kit: inverse ink panel,

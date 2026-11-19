@@ -2,7 +2,7 @@ import {
   emptyPlacement,
   type ShopPlacement,
   type ShopProductRef,
-} from "@tracht-digital-solutions/tds-shared/schemas";
+} from "@tracht-digital-labs/tds-shared/schemas";
 
 import { contentApiBase } from "./connection";
 import { memoisedOr, readContentJson } from "./contentFetch";

@@ -54,7 +54,7 @@ export const siteConfig = {
   /** Public social URLs — mirror tds-landingpage's seo.ts. */
   socials: {
     linkedin: "https://www.linkedin.com/in/julian-tracht/",
-    github: "https://github.com/Tracht-Digital-Solutions",
+    github: "https://github.com/Tracht-Digital-Labs",
   } as {
     linkedin?: string;
     github?: string;

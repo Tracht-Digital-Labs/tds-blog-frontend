@@ -25,7 +25,7 @@ import { categorySlug } from "~/lib/taxonomy";
 import { pageTitle, siteConfig } from "~/lib/seo";
 import { postDescription } from "~/lib/metaDescription";
 import type { LocalizedPost } from "~/lib/localizedPost";
-import type { BlogPost } from "@tracht-digital-solutions/tds-shared";
+import type { BlogPost } from "@tracht-digital-labs/tds-shared";
 
 interface Props {
   localized: LocalizedPost;
@@ -653,7 +653,7 @@ const jsonLd = [
   </main>
 
   <script>
-    import { writePrefs } from "@tracht-digital-solutions/tds-shared/prefs";
+    import { writePrefs } from "@tracht-digital-labs/tds-shared/prefs";
 
     // Reader focus mode: toggles `focus-mode` on <html> (pre-paint restore lives
     // in Layout), persists the choice, and binds the `f` key (toggle) + `Escape`
@@ -735,7 +735,7 @@ const jsonLd = [
   </script>
 
   <script>
-    import { writePrefs } from "@tracht-digital-solutions/tds-shared/prefs";
+    import { writePrefs } from "@tracht-digital-labs/tds-shared/prefs";
 
     // Fold the section nav into a tick rail (each section = one line; the
     // line for the section in view expands via the scroll-spy `.on` class).

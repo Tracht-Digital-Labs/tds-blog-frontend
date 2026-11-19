@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
-import { transitionUpdate } from "@tracht-digital-solutions/tds-shared/motion";
+import { transitionUpdate } from "@tracht-digital-labs/tds-shared/motion";
 import PostCard, { type CardPost } from "../PostCard";
 import HeroSlider from "./HeroSlider";
 

@@ -17,7 +17,7 @@ import {
   forLanguages,
   type CacheEvent,
   type EventMap,
-} from "@tracht-digital-solutions/tds-shared/cache";
+} from "@tracht-digital-labs/tds-shared/cache";
 
 import { corpus, type Lang, type PostSummary } from "./routes";
 import { categorySlug } from "./taxonomy";

@@ -14,7 +14,7 @@
  * The Entdecken labels stay here as DE/EN literals to match the existing local
  * convention; promoting them into tds-shared i18n is a follow-up.
  */
-import { PROPERTY_ORIGINS, propertyNav } from "@tracht-digital-solutions/tds-shared/nav";
+import { PROPERTY_ORIGINS, propertyNav } from "@tracht-digital-labs/tds-shared/nav";
 
 export type Lang = "de" | "en";
 

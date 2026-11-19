@@ -13,7 +13,7 @@
  * renders the source blocks (untranslated), which is why it stays a fallback.
  */
 
-import type { BlogBlock, BlogPost } from "@tracht-digital-solutions/tds-shared";
+import type { BlogBlock, BlogPost } from "@tracht-digital-labs/tds-shared";
 import { getPost, type FullPost } from "./content-api";
 import { renderMarkdown } from "./marked";
 import { translateHtml, translateText } from "./translate";

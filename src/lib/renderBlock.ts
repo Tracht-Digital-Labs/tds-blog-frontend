@@ -1,5 +1,5 @@
 import { marked } from "marked";
-import type { BlogBlock } from "@tracht-digital-solutions/tds-shared";
+import type { BlogBlock } from "@tracht-digital-labs/tds-shared";
 import { renderMarkdown } from "./marked";
 
 /**
