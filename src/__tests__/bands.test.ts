@@ -102,9 +102,11 @@ describe("no margin between blocks", () => {
 
 describe("almost no white", () => {
   it("fills no island button with white", () => {
-    for (const name of ["HeroSlider.tsx", "NewsletterSignup.tsx"]) {
-      const src = readFileSync(join(SRC, "components", "islands", name), "utf8");
-      expect(src, name).not.toMatch(/background:\s*"#fff(fff)?"/);
+    const islands = markup.filter((f) => f.includes(join("components", "islands")));
+    // The hero's CTA (islands/hero/) is the one that used to be white.
+    expect(islands.some((f) => f.endsWith("HeroSlide.tsx"))).toBe(true);
+    for (const file of islands) {
+      expect(readFileSync(file, "utf8"), file).not.toMatch(/background:\s*"#fff(fff)?"/);
     }
   });
 

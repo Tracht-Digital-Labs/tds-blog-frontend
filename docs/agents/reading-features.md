@@ -16,7 +16,9 @@ pagination like a category. Categories stay in the rail and the phone strip. The
 ## Hero slider (`src/components/islands/HeroSlider.tsx`)
 
 A carousel track rotating up to three sets (Empfohlen / Aktuelles / Populär), all rendered side by side in
-`.hero-track`; the component translates the track by `-activeIndex * 100%` plus live drag pixels.
+`.hero-track`; the component translates the track by `-activeIndex * 100%` plus live drag pixels. One set renders as
+`islands/hero/HeroSlide.tsx`; the set names and words are `islands/hero/labels.ts`. The drag and pointer handling
+stays in `HeroSlider.tsx`, where `HeroSlider.test.tsx` reads it.
 
 **Populär** and the author pages' "Aufrufe" sort read `listReads()` (`/content/analytics/reads`, site key): page views per
 article over 90 days from the Besucher-Statistik, so only consented visitors count — a ranking, not an audience size.
