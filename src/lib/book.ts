@@ -2,7 +2,7 @@
  * Every post is drawn as a book whose page block grows with its length.
  *
  * Five thicknesses rather than a continuous value: the page block is a stack
- * of hard 1px lines (CSS `.book--1` … `.book--5` in global.css), and a
+ * of hard 1px lines (CSS `.book--1` … `.book--5` in `styles/global/books.css`), and a
  * continuous thickness would need a generated shadow per card — an inline
  * style the hover state and the container queries could no longer override.
  *

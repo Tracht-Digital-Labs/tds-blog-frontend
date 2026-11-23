@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readSharedStyle } from "./sharedStyle";
+import { readStylesheet } from "./stylesheet";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -17,9 +18,8 @@ import { join } from "node:path";
  */
 
 const HEADER = join(process.cwd(), "src", "components", "JournalHeader.astro");
-const GLOBAL_CSS = join(process.cwd(), "src", "styles", "global.css");
 const raw = readFileSync(HEADER, "utf8");
-const css = readFileSync(GLOBAL_CSS, "utf8");
+const css = readStylesheet("global");
 
 /** This file documents the traps being pinned, so assert against code only. */
 const source = raw

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { readSharedStyle } from "./sharedStyle";
+import { readStylesheet } from "./stylesheet";
 
 /**
  * Layout posture tests.
@@ -21,7 +22,6 @@ import { readSharedStyle } from "./sharedStyle";
 // Anchored to the vitest root (the repo root), not to import.meta.url: under
 // the jsdom environment import.meta.url is not a file: URL.
 const SRC = join(process.cwd(), "src");
-const GLOBAL_CSS = join(SRC, "styles", "global.css");
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -33,7 +33,7 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 const sourceFiles = walk(SRC).filter((f) => /\.(astro|tsx|ts)$/.test(f) && !f.includes("__tests__"));
-const css = readFileSync(GLOBAL_CSS, "utf8");
+const css = readStylesheet("global");
 
 /**
  * Strip comments before asserting. These files document the very traps being

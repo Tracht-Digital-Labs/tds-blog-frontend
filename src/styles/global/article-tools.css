@@ -1,0 +1,141 @@
+/* The article's floating reading tools and its collapsible sidebar. */
+
+/* ---- Article: floating reading tools (zoom, focus, print) ----
+   Quiet by design: no ground, no shadow, muted icons at reduced opacity that
+   only come up to full strength while the bar is hovered or holds focus.
+   A fixed column in the bottom-right corner of the viewport, lifted above the
+   cookie notice and the chat launcher by their published lanes. It used to
+   hang in the text's left margin on a sticky anchor, which made it travel
+   with the article and jump when the sidebar opened; a fixed corner never
+   moves. Below lg the same tools live in the app's "Mehr" page instead. */
+.reader-tools {
+  position: fixed;
+  right: 0.75rem;
+  bottom: calc(var(--tds-bottom-lane, 0px) + var(--tds-right-lane, 0px) + 0.75rem);
+  z-index: 30;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: color-mix(in srgb, var(--color-paper) 86%, transparent);
+  opacity: 0.75;
+  transition: opacity 180ms ease;
+}
+.reader-tools:hover,
+.reader-tools:focus-within { opacity: 1; }
+.reader-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+.reader-tool:hover,
+.reader-tool:focus-visible {
+  color: var(--color-ink);
+  background: var(--jnl-tile-hover);
+}
+.reader-tool[aria-pressed="true"] { color: var(--color-accent); }
+.reader-tool:disabled {
+  opacity: 0.35;
+  cursor: default;
+  background: transparent;
+  color: var(--color-muted);
+}
+/* On a phone the same tools live in the app's settings sheet ("Mehr"), so
+   the floating cluster would only be a second copy over the text. */
+@media (max-width: 1023.98px) {
+  .reader-tools-anchor { display: none; }
+}
+@media (min-width: 1024px) {
+  .reader-tools {
+    right: 1rem;
+    bottom: calc(var(--tds-bottom-lane, 0px) + var(--tds-right-lane, 0px) + 1rem);
+    flex-direction: column;
+    opacity: 0.55;
+  }
+}
+@media print {
+  .reader-tools-anchor { display: none; }
+}
+
+/* ---- Article: fixed collapsible sidebar (lg+) ---- */
+.blog-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 264px;
+  z-index: 40;
+  background: var(--jnl-tint);
+  --jnl-tile: var(--color-soft);
+  --jnl-tile-hover: color-mix(in srgb, var(--color-soft) 92%, var(--color-ink));
+  display: none;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+  transition: width 320ms ease, padding 320ms ease;
+}
+/* Sidebar width as a variable so the back-rail + column-centering can follow
+   the expand/collapse without duplicated breakpoints. */
+.with-sidebar { --nav-w: 264px; }
+.with-sidebar.nav-collapsed { --nav-w: 64px; }
+@media (min-width: 1024px) {
+  .blog-sidebar { display: flex; }
+  /* The wrapper stays offset by the sidebar (keeps the footer / newsletter
+     clear of it); only the reading column re-centres on the viewport. */
+  .with-sidebar { margin-left: var(--nav-w); transition: margin-left 320ms ease; }
+  .with-sidebar #reading-progress { left: 0; }
+  .with-sidebar .brand-header { display: none; }
+}
+.blog-sidebar.collapsed { width: 64px; padding: 1.25rem 0.75rem; }
+.blog-sidebar.collapsed .sidebar-hide-collapsed { display: none; }
+.blog-sidebar .sidebar-show-collapsed { display: none; }
+.blog-sidebar.collapsed .sidebar-show-collapsed { display: inline-flex; }
+.blog-sidebar.collapsed .sidebar-head { justify-content: center; }
+.sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: var(--jnl-tile);
+  color: var(--color-muted);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+.sidebar-toggle:hover { background: var(--jnl-tile-hover); color: var(--color-primary); }
+.sidebar-toggle svg { transition: transform 320ms ease; }
+.blog-sidebar.collapsed .sidebar-toggle svg { transform: rotate(180deg); }
+.blog-sidebar a.snav-item {
+  display: block;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  text-decoration: none;
+  /* Flat: a left accent bar via inset box-shadow (no fill, no layout shift)
+     to match the angular kit, instead of the old soft-tint background. */
+  box-shadow: inset 2px 0 0 transparent;
+  transition: color 180ms ease, box-shadow 180ms ease;
+}
+.blog-sidebar a.snav-item:hover,
+.blog-sidebar a.snav-item:focus-visible {
+  color: var(--color-ink);
+  box-shadow: inset 2px 0 0 var(--color-line);
+}
+.blog-sidebar a.snav-item[aria-current="page"] {
+  color: var(--color-primary);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--color-accent);
+}
+.blog-sidebar .tds-lang-toggle { display: flex; width: 100%; background: var(--jnl-tile); }
+.blog-sidebar .tds-lang-toggle a { flex: 1; justify-content: center; height: 1.875rem; }
+.blog-sidebar .btn-flat { width: 100%; justify-content: center; }

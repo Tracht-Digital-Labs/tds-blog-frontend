@@ -1,0 +1,306 @@
+/* The index: page title, category rail, post cards, editorial rows, category sidebar. */
+
+/* ---- Fluid page title ----
+   Replaces the `text-4xl md:text-5xl` pair that was repeated on 12 headings
+   (article h1, both aktuelles, both page/[num], category, tag, author, RSS).
+   That pair had exactly two sizes and its larger one arrived at 768px, so the
+   headline was the same 3rem at 768 as at 2560 — the single loudest reason
+   the page looked under-scaled on a big monitor.
+
+   `.display` deliberately ships no font-size (the app owns display sizing),
+   so this is the only rule setting it. Pair the two classes. */
+.page-title {
+  font-size: clamp(2.25rem, 1.75rem + 2.2vw, 4rem);
+  line-height: 1.05;
+}
+
+/* ---- Index: category rail (lg and up) ----
+   Was two inline pixel values in BlogIndex.tsx (216 / 30). The expanded rail
+   is fluid now, which an inline style cannot express — --tds-rail is a clamp()
+   of the viewport. Deliberately NOT transitioned: animating this width reflows
+   the article grid beside it on every frame. */
+.blog-cat-rail {
+  width: var(--tds-rail);
+}
+.blog-cat-rail.is-collapsed {
+  width: 1.875rem;
+}
+/* The rail stands beside a shelf of books, not a mosaic: it keeps the shelf's
+   own gutter. The old 1px seam put the first book's spine flush against the
+   rail while every other book had air around it. */
+@media (min-width: 1024px) {
+  .blog-index-row {
+    column-gap: calc(var(--tds-gutter) * 0.9);
+  }
+}
+
+/* The mobile category strip bleeds to both page edges so the chips can be
+   scrolled from the very edge of the screen. The bleed has to be derived from
+   --tds-gutter, not from a `-mx-6 px-6` pair: the gutter is a clamp() now, so
+   a fixed 24px negative margin would leave a visible step at every width
+   except the one it was written for. */
+.blog-cat-strip {
+  margin-inline: calc(var(--tds-gutter) * -1);
+  padding-inline: var(--tds-gutter);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.blog-cat-strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* The grid's heading row: heading left, the shared filter toggle right
+   (tds-shared .tds-filterbar__toggle); the panel opens below it. */
+.blog-grid-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding-bottom: 18px;
+}
+/* Only a token for the shared panel: on the tint band it is a tile in the
+   band's counter-tone, like every other block in it. */
+#blog-index-island .tds-filterbar__panel {
+  --tds-flat-tint: var(--jnl-tile);
+}
+
+/* ---- Flat post cards (index grid, related strip) ----
+   The card is a CONTAINER: it re-composes itself from the width it is given,
+   not from the viewport. That is what lets one component serve a narrow
+   4-column cell, a 2-column cell and a full-width lead row with no `large`
+   variant plumbed through three call sites.
+
+   THREE RULES THAT MUST NOT BE BROKEN HERE:
+   1. THE CONTAINER IS THE SLOT, NEVER THE CARD. A container query styles the
+      DESCENDANTS of a container — an element can never respond to its own
+      container-type. Putting `container-type` on .post-card and then writing
+      `@container { .post-card { … } }` silently matches nothing: the card
+      looks for an ancestor container, finds none, and the rule is dead. It
+      fails quietly and looks exactly like a card that simply did not change.
+   2. `height: 100%` is load-bearing, not cosmetic. The cards used to fill
+      their row via a `<li class="flex">` wrapper. A flex item derives its
+      base size from max-content, and size containment makes max-content ZERO
+      — so with a flex parent a contained card collapses to a 0px sliver and,
+      thanks to `overflow: hidden`, disappears completely. No error, no
+      overflow, no failing test. The wrappers are gone; this replaces them.
+   3. Nothing inside the card may be inline-styled, because an @container rule
+      cannot beat an inline style. See PostCard.tsx. */
+.post-card-slot {
+  container-type: inline-size;
+}
+.post-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--jnl-tile);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 180ms ease;
+}
+.post-card:hover { background: var(--jnl-tile-hover); }
+
+.post-card__cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+.post-card--large .post-card__cover { aspect-ratio: 16 / 8.2; }
+
+.post-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  padding: 16px 18px 14px;
+}
+.post-card--large .post-card__body { padding: 22px 22px 18px; }
+
+.post-card__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.post-card__date {
+  font-size: 12px;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.post-card__excerpt {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.post-card--large .post-card__excerpt {
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+.post-card__foot {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.post-card .card-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.375rem;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--color-black);
+  margin: 0;
+  text-wrap: pretty;
+  transition: color 180ms ease;
+}
+.post-card:hover .card-title { color: var(--color-primary); }
+
+/* Wide track → cover BESIDE the text instead of above it. 34rem is the width
+   at which a stacked card's 16/9 cover starts to dominate the cell and the
+   excerpt is left hanging under a very wide image.
+   Note the unit: @container sizes measure THIS CARD, so the same rule fires
+   for a full-width lead at 1280px and for a 2-column cell at 2560px — which
+   is exactly the point, and is not something a media query can express. */
+@container (min-width: 34rem) {
+  .post-card {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .post-card__cover {
+    flex: 0 0 42%;
+    aspect-ratio: auto;
+  }
+  .post-card__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: center;
+    padding: 22px 24px;
+  }
+  .post-card__excerpt {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+  .post-card .card-title { font-size: 1.75rem; }
+}
+
+/* An item that spans every track of an intrinsic grid, whatever the column
+   count resolved to. `sm:col-span-2 lg:col-span-3` cannot do this: auto-fill
+   has no fixed count to count against. At one column it is a no-op. */
+.grid-span-all { grid-column: 1 / -1; }
+
+/* Roomier variant of the intrinsic grid for short, text-only cards (topics,
+   reader programs, "for you"). They carry a heading plus one line, so the
+   16rem post-card floor would slice them into six thin columns at 1920px;
+   22rem lands on four. Set the token, never a column count — that is what
+   keeps the grid responsive to the space it actually gets. */
+.tds-grid-roomy { --tds-grid-min: 22rem; }
+
+/* ---- Flat editorial rows (pagination + tag lists) ---- */
+.post-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 1.25rem 1.5rem;
+  background: var(--jnl-tile);
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 180ms ease;
+}
+@media (min-width: 640px) {
+  /* The date column was a hardcoded 150px that never grew, so on a wide
+     screen the row read as a narrow date against a very long title. It is a
+     range now: it tracks the row's own width and stops at 14rem, which is
+     comfortably past the longest German long-form date. */
+  .post-row {
+    grid-template-columns: clamp(8rem, 12vw, 14rem) minmax(0, 1fr) auto;
+    gap: 1.75rem;
+  }
+}
+.post-row:hover { background: var(--jnl-tile-hover); }
+.post-row .row-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.75rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-black);
+  margin: 0 0 0.5rem;
+  text-wrap: pretty;
+  transition: color 180ms ease;
+}
+.post-row:hover .row-title { color: var(--color-primary); }
+.post-row .row-arrow {
+  font-size: 1.25rem;
+  color: var(--color-muted);
+  transition: color 180ms ease;
+}
+.post-row:hover .row-arrow {
+  color: var(--color-accent);
+}
+
+/* ---- Category sidebar (index) ---- */
+.sidenav { position: sticky; top: 5.25rem; }
+.sidenav .sidenav-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0;
+  padding-bottom: 0.875rem;
+}
+.sidenav-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  border: 0;
+  cursor: pointer;
+  background: var(--jnl-tile);
+  color: var(--color-muted);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+.sidenav-toggle:hover { background: var(--jnl-tile-hover); color: var(--color-ink); }
+.sidenav button.sidenav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  background: var(--jnl-tile);
+  color: var(--color-muted);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  font-weight: 500;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+.sidenav button.sidenav-item:hover { background: var(--jnl-tile-hover); color: var(--color-ink); }
+.sidenav button.sidenav-item.on {
+  background: var(--color-surface-navy);
+  color: #fff;
+}
+.sidenav .cnt {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+.sidenav button.sidenav-item.on .cnt { color: rgb(255 255 255 / 0.7); }

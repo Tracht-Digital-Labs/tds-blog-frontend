@@ -1,0 +1,107 @@
+/* === Hard 2D shadows (2026-09-22, tds-shared >= 0.42) =====================
+   The public sites carry a fixed, unblurred offset on every box and control
+   (`--tds-shadow-hard*`, set by the blog surface). The journal keeps its own
+   rule — tiles inside a band with 1px seams, see "Farbbänder statt Abstände"
+   in AGENTS.md — so a MOSAIC takes the shadow as one shape: `drop-shadow`
+   on the container follows the tiles it paints and ignores empty grid
+   tracks, where a box-shadow on the container would outline them. Single
+   boxes and controls take the token directly; controls press into it. */
+
+/* The dark bands flip the ink: a navy offset vanishes on navy. `var()` in a
+   custom property resolves where it is declared, hence the re-declaration. */
+.hero-stage,
+.jnl-tone-navy,
+.jnl-tone-ink,
+.jnl-tone-accent {
+  --tds-shadow-ink: rgb(0 0 0 / 0.5);
+  --tds-shadow-hard: 6px 6px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-sm: 3px 3px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-press: 1px 1px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-hover: 8px 8px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-sm-hover: 5px 5px 0 0 var(--tds-shadow-ink);
+}
+
+.tds-grid-auto.jnl-mosaic,
+.jnl-stack,
+.jnl-article-end {
+  filter: drop-shadow(6px 6px 0 var(--tds-shadow-ink));
+}
+.topic-card {
+  box-shadow: var(--tds-shadow-hard-sm);
+}
+/* A field is pressed IN, not lifted: the depth is drawn inside the box. Its
+   own ink, because the shared black-at-13% vanishes on the navy band. */
+.newsletter-form .newsletter-input {
+  --tds-inset-ink: rgb(0 0 0 / 0.4);
+  box-shadow: var(--tds-shadow-inset);
+}
+.btn-flat,
+.hero-cta,
+.hero-arrow {
+  box-shadow: var(--tds-shadow-hard-sm);
+  transition-property: background-color, border-color, color, translate;
+}
+.chip-flat {
+  box-shadow: var(--tds-shadow-hard-press);
+}
+.btn-flat:active,
+.hero-cta:active,
+.hero-arrow:active,
+.chip-flat:active {
+  translate: 2px 2px;
+  box-shadow: var(--tds-shadow-hard-press);
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-flat:active,
+  .hero-arrow:active,
+  .chip-flat:active {
+    translate: none;
+  }
+}
+/* A mosaic nested in another keeps one shadow — the outer one. */
+:is(.tds-grid-auto.jnl-mosaic, .jnl-stack, .jnl-article-end) :is(.tds-grid-auto.jnl-mosaic, .jnl-stack, .jnl-article-end) {
+  filter: none;
+}
+/* Paper itself has no depth: on paper (@media print below) every shadow goes.
+   On screen the print view takes the kit's hard offsets (2026-10-06). */
+@media print {
+  * {
+    box-shadow: none !important;
+  }
+  :is(.tds-grid-auto.jnl-mosaic, .jnl-stack, .jnl-article-end) {
+    filter: none !important;
+  }
+}
+
+/* Hover LIFTS an interactive element toward the pointer (2026-09-26): 2px
+   up-left while its offset grows by the same 2px. A tile inside a mosaic
+   leaves the shared drop-shadow for its own — it needs a fill and a stacking
+   level of its own to do that, which `.jnl-tile`/`.post-card` already have. */
+.btn-flat:is(:hover, :focus-visible),
+.hero-cta:is(:hover, :focus-visible),
+.hero-arrow:is(:hover, :focus-visible),
+.topic-card:is(:hover, :focus-visible) {
+  translate: -2px -2px;
+  box-shadow: var(--tds-shadow-hard-sm-hover);
+}
+.chip-flat:is(:hover, :focus-visible) {
+  translate: -1px -1px;
+  box-shadow: var(--tds-shadow-hard-sm);
+}
+.post-card,
+a.jnl-tile {
+  transition-property: background-color, color, translate;
+  transition-duration: 180ms;
+}
+.post-card:is(:hover, :focus-visible),
+a.jnl-tile:is(:hover, :focus-visible) {
+  position: relative;
+  z-index: 2;
+  translate: -2px -2px;
+  box-shadow: var(--tds-shadow-hard-hover);
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.btn-flat, .hero-cta, .hero-arrow, .topic-card, .chip-flat, .post-card, a.jnl-tile):is(:hover, :focus-visible) {
+    translate: none;
+  }
+}

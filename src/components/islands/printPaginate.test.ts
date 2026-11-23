@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { countHighlights, highlightRange, removeHighlights } from "./printPaginate";
+import { readStylesheet } from "../../__tests__/stylesheet";
 
 /**
  * The print view's highlighter. A selection across two paragraphs used to be
@@ -80,7 +79,7 @@ describe("highlightRange", () => {
 });
 
 describe("print preview = paper", () => {
-  const css = readFileSync(join(__dirname, "../../styles/global.css"), "utf8");
+  const css = readStylesheet("global");
   it("never sizes the print sheet's type by the viewport", () => {
     // `vw` measures the screen in the preview and the paper in print, so the
     // two wrapped — and broke pages — differently.

@@ -1,0 +1,8 @@
+/* === Grotesk heading weights =======================================
+   The card/row/article headings above were first tuned for a serif
+   display (which read fine at weight 400). With the design-system grotesk
+   display face they need real weight to register as headings. Placed
+   last so it wins over the definitions above. */
+.post-card .card-title,
+.post-row .row-title { font-weight: 700; }
+.article-sec h2 { font-weight: 700; }

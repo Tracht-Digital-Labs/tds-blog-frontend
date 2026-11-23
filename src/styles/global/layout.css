@@ -1,0 +1,35 @@
+/* The section-nav rail width and the blog's fluid layout overrides. */
+
+:root {
+  /* width of the expanded article section-nav rail (right viewport edge) */
+  --toc-w: 220px;
+}
+
+/* === Fluid layout — the blog's overrides ============================
+   `.tds-shell`, `.tds-grid-auto` and the whole token scale
+   (--tds-shell-*, --tds-measure, --tds-grid-min, --tds-gutter) live in
+   tds-shared's primitives.css / base.css as of 0.24.4. Only what this site
+   genuinely sets differently belongs here.
+
+   These are NOT in tds-shared/surfaces/blog.css on purpose: since its 0.9.0
+   `tds-tools-frontend` renders the SAME blog surface (`data-surface="blog"` +
+   surfaces/blog.css), so a shell width put there would silently widen the
+   public tools site too. Only values that are right for BOTH sites may be
+   promoted into the surface layer; the shell ceiling is not one of them.
+
+   And no token name may carry a digit — tds-shared's design.test.ts scans
+   surface files with /var\((--tds-[a-z-]+)/, a class with no `0-9`, so
+   `var(--tds-shell-2xl)` is captured as `--tds-shell-` and fails naming a
+   token nobody wrote. Word suffixes only. */
+:root {
+  /* The page width (`--tds-shell-max: 120rem`, `--tds-shell-wide`) lives in
+     tds-shared's blog surface, which the tools site and the shop render too:
+     the three public bars share their edges only while ONE file sets them.
+     120rem is the practical stop — past ~1920px a 6th column would drop each
+     card below its comfortable minimum, so 1920 and 2560 render identically;
+     that is the editorial answer (bigger content, not more of it), not a bug. */
+
+  /* Blog-only: the index's category rail. Nothing in the shared library has
+     a rail, so this stays here rather than in base.css. */
+  --tds-rail: clamp(11rem, 13vw, 15rem);
+}

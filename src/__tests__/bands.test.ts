@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readStylesheet } from "./stylesheet";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -30,7 +31,7 @@ function walk(dir: string, out: string[] = []): string[] {
 const stripComments = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 
-const css = stripComments(readFileSync(join(SRC, "styles", "global.css"), "utf8"));
+const css = stripComments(readStylesheet("global"));
 const markup = walk(SRC).filter((f) => /\.(astro|tsx)$/.test(f) && !/\.test\.tsx$/.test(f));
 const PAGES = join(SRC, "pages");
 

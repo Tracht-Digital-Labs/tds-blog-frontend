@@ -5,7 +5,8 @@
 `<html data-surface="blog">` in `Layout.astro` activates tds-shared's `surfaces/blog.css`: every radius 0, no blurred
 elevation, the 800 display voice, the display-face eyebrow, `--tds-flat-tint` / `--tds-flat-hover`. `global.css`
 imports `base.css` → `primitives.css` → `prose.css` → `app.css` → `surfaces/blog.css`. Fonts: Lato (display), Plus
-Jakarta Sans (body), JetBrains Mono.
+Jakarta Sans (body), JetBrains Mono. The blog's own rules follow in partials under `styles/global/`, in cascade order;
+tests read the whole sheet through `readStylesheet("global")` (`src/__tests__/stylesheet.ts`).
 
 - **Set a token in the surface layer; never re-declare a shared class in `global.css`.** Removed for good: local
   `--font-*` re-declarations, `.display` / `.display-tight` / `.eyebrow` forks, the `.brand-wordmark` copy,
@@ -51,7 +52,7 @@ Nothing sits on white:
 - Single boxes and controls (`.btn-flat`, `.hero-cta`, `.hero-arrow`, `.chip-flat`, `.topic-card`) take the tokens and
   press into them. Dark bands (`.jnl-tone-navy/-ink/-accent`, `.hero-stage`) re-declare black ink.
 - Hover and focus lift an interactive element 2 px up-left while its offset grows; a tile leaves the mosaic shadow for
-  its own with `z-index: 2`. Print stays flat. The block is the last section of `global.css`.
+  its own with `z-index: 2`. Print stays flat. The block is `styles/global/shadows.css`.
 - Form controls (`.newsletter-input`, the print switches) are pressed **in** with an inset, never lifted by the offset.
 
 ## Posts are books

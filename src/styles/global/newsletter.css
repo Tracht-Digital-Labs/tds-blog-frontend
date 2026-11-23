@@ -1,0 +1,31 @@
+/* ---- Newsletter ---- */
+/* Email + submit on one row; stacks to full-width on the narrowest
+   phones so the button never gets squeezed off the line. */
+.newsletter-form {
+  display: flex;
+  gap: 12px;
+}
+@media (max-width: 419px) {
+  .newsletter-form { flex-direction: column; }
+  .newsletter-form .btn-flat { width: 100%; }
+}
+.newsletter-input {
+  height: 3rem;
+  padding: 0 1rem;
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+  font-family: var(--font-body);
+  /* 16px so iOS Safari doesn't auto-zoom the page on focus. */
+  font-size: 1rem;
+  transition: background-color 180ms ease;
+}
+.newsletter-input::placeholder { color: rgb(255 255 255 / 0.45); }
+.newsletter-input:focus {
+  /* The ring is gone here too (tds-shared draws the coloured well instead).
+     This field sits on a dark band where bordeaux sinks, so its well is coral. */
+  --tds-focus-ink: var(--color-accent-pink);
+  background: rgb(255 255 255 / 0.2);
+}

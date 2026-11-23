@@ -1,0 +1,227 @@
+/* The article: back button, current-topics cards, collapsible sections, shell layout. */
+
+/* ---- Article: back button ---- */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: var(--jnl-tile);
+  color: var(--color-ink);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 180ms ease;
+}
+.btn-back:hover { background: var(--jnl-tile-hover); }
+
+/* Author-page sort control (AuthorPostList island). Flat, angular to match the
+   design-system blog kit; the active option inverts to the ink surface. */
+.author-sort-btn {
+  padding: 0.375rem 0.75rem;
+  background: var(--jnl-tile);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.author-sort-btn:hover { background: var(--jnl-tile-hover); color: var(--color-ink); }
+.author-sort-btn[data-active] {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+/* Single arrow-only back control, sitting directly left of the heading. The
+   SVG arrow is centred in the square via flex (the old "←" glyph rendered
+   off-centre). Small screens: inline before the title (title-row is a flex
+   row). lg+: hangs into the left margin so the heading isn't indented. */
+.back-rail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  background: var(--jnl-tile);
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: background-color 180ms ease;
+}
+.back-rail:hover { background: var(--jnl-tile-hover); }
+.title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+/* Below lg the phone's tab bar already leads home ("Start"), and the arrow cost
+   the title 52px of an already narrow line (2026-10-07). */
+@media (max-width: 1023.98px) {
+  .title-row .back-rail { display: none; }
+}
+@media (min-width: 1024px) {
+  .title-row {
+    display: block;
+    position: relative;
+  }
+  .title-row .back-rail {
+    position: absolute;
+    right: 100%;
+    top: 0.15em;
+    margin-right: 0.75rem;
+  }
+}
+
+/* ---- Aktuelle Themen (current topics) cards ---- */
+.topic-card {
+  display: block;
+  height: 100%;
+  padding: 1.25rem 1.375rem;
+  background: var(--jnl-tile);
+  border-left: 2px solid var(--color-accent);
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 180ms ease;
+}
+a.topic-card:hover,
+a.topic-card:focus-visible {
+  background: var(--jnl-tile-hover);
+}
+.topic-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  line-height: 1.25;
+  margin: 0 0 0.35rem;
+  color: var(--color-ink);
+}
+.topic-desc {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* ---- Article: collapsible sections ---- */
+.article-sec h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  font-size: 1.875rem;
+  line-height: 1.15;
+  margin: 2.25rem 0 0.75rem;
+  scroll-margin-top: 3rem;
+  color: var(--color-black);
+}
+.sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+}
+.sec-head svg {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  transition: transform 180ms ease, color 180ms ease;
+}
+.sec-head:hover svg { color: var(--color-primary); }
+.sec-head[aria-expanded="false"] svg { transform: rotate(-90deg); }
+
+/* Animated body — grid-rows trick animates to/from auto height */
+.sec-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 320ms ease;
+}
+.sec-body.closed { grid-template-rows: 0fr; }
+.sec-body > .sec-body-inner { overflow: hidden; min-height: 0; }
+
+/* ---- Article: shell layout ----
+   A single centred reading column. The section nav (.toc) and the back-rail
+   are both FIXED against the viewport (they float in the side margins), so the
+   shell reserves no side columns for them. On sidebar pages the column is
+   window-centred (see below) regardless of the sidebar's state; the fixed TOC
+   and sidebar overlay the side whitespace. */
+.article-shell {
+  max-width: var(--tds-shell-article);
+  margin-inline: auto;
+}
+.article-col {
+  max-width: var(--tds-shell-prose);
+  margin-inline: auto;
+}
+
+/* .tds-prose caps itself at --tds-measure (65ch) but ships no margin-inline,
+   so once the measure is NARROWER than the column the paragraphs would sit
+   left while the heading, lede, author box and prev/next still span the full
+   width — a ragged right edge aligned to nothing.
+   Measured, that is not the case today: 65ch resolves to ~809px in Plus
+   Jakarta Sans at 17px (a `ch` here is ~12.4px, not the ~8.5px a Lato-based
+   estimate suggests), so the measure sits just outside the 48rem column and
+   never binds. This rule is therefore currently a no-op — kept because it
+   stops being one the moment the column or the measure moves, and because the
+   failure it prevents is a silent one. */
+.article-col .tds-prose {
+  margin-inline: auto;
+}
+
+/* The reading frame: title, lede and body run at a reading measure, not at
+   the 48rem column. 48rem set ~87 characters per line at the lg prose size
+   (19px); 38rem sets ~70, inside the 60–75 a long text reads best at. The
+   panels after the article (contact, author, related, prev/next) stay on the
+   wider `.article-col`. The reader's zoom (`--reader-zoom` on <html>, set by
+   the floating buttons) scales the frame as a whole with CSS `zoom`, so a
+   larger text keeps the same characters per line instead of wrapping more —
+   and the frame's own width grows with it, capped by whatever is available. */
+.article-shell {
+  --read-w: 38rem;
+  --toc-reserve: var(--tds-gutter);
+}
+.article-shell.has-toc { --toc-reserve: calc(var(--toc-w) + 1.75rem); }
+.article-shell.has-toc.toc-collapsed { --toc-reserve: 4.5rem; }
+.article-col {
+  max-width: max(var(--tds-shell-prose), calc(var(--read-w) * var(--reader-zoom, 1)));
+}
+.article-read {
+  position: relative;
+  max-width: calc(var(--read-w) * var(--reader-zoom, 1));
+  margin-inline: auto;
+}
+.article-zoom { zoom: var(--reader-zoom, 1); }
+
+@media (min-width: 1024px) {
+  /* The column sits on the VIEWPORT centre and never moves when the sidebar
+     or the TOC folds.
+
+     The shell steps back over the sidebar offset (`margin-left: -nav-w`) so
+     it spans the full window, and pads BOTH sides by the larger of the two
+     reservations: left = sidebar rail + gutter + the floating reading tools,
+     right = the TOC rail. Symmetric padding plus `margin-inline: auto` on the
+     column is the centre — no viewport arithmetic, no `left` offsets.
+
+     What it replaced centred the column in what was left RIGHT of the
+     sidebar, so the text moved with the sidebar. Combined with the pre-paint
+     restore running before `#page-shift` existed, a collapsed rail (64px)
+     sat next to a page still offset by 264px, and every article rendered
+     100px right of centre. Folding a rail now only narrows the column when
+     the window is too small to hold both reservations. */
+  .with-sidebar .article-shell {
+    max-width: none;
+    margin-left: calc(-1 * var(--nav-w));
+    padding-inline: max(
+      calc(var(--nav-w) + var(--tds-gutter)),
+      var(--toc-reserve)
+    );
+    transition: margin-left 320ms ease, padding 320ms ease;
+  }
+}

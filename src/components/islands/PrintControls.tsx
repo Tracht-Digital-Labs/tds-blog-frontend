@@ -4,7 +4,7 @@ import { countHighlights, highlightRange, paginate, removeHighlights } from "./p
 /**
  * Screen-only control panel for the article print view (`/[slug]/print`) —
  * a floating panel on the right of a wide screen, a sticky bar on a phone
- * (see `.print-controls` in global.css). Choices persist in localStorage.
+ * (see `.print-controls` in `styles/global/print.css`). Choices persist in localStorage.
  * It drives:
  *
  *   • Page size (A5/A4/A3) — a `size-<x>` class on `#print-root` (the sheets
