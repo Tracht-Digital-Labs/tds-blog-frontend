@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
 import { transitionUpdate } from "@tracht-digital-labs/tds-shared/motion";
-import PostCard, { type CardPost } from "../PostCard";
+import { filterPosts, plural, type IndexPost, type LengthBand, type SortKey } from "~/lib/indexFilter";
+import PostCard from "../PostCard";
 import HeroSlider from "./HeroSlider";
+import CategorySidebar from "./index/CategorySidebar";
+import FilterPanel from "./index/FilterPanel";
+import { LABELS } from "./index/labels";
 
 /**
  * Journal index from the design-system blog template ("Hero + Grid"):
@@ -15,211 +19,6 @@ import HeroSlider from "./HeroSlider";
  * the query round-trips through `?q=` so a refresh keeps the search.
  * Posts arrive as build-time props — no runtime content-api calls.
  */
-
-export interface IndexPost extends CardPost {
-  tags?: string | null;
-  /** Reads (Besucher-Statistik, else the CMS counter): the "most read" order. */
-  viewCount?: number;
-}
-
-/** Reading-time bands of the filter bar. A post without a length is in none. */
-type LengthBand = "all" | "short" | "medium" | "long";
-type SortKey = "new" | "popular";
-
-function inBand(minutes: number | null | undefined, band: LengthBand): boolean {
-  if (band === "all") return true;
-  if (!minutes) return false;
-  if (band === "short") return minutes <= 3;
-  if (band === "medium") return minutes > 3 && minutes <= 8;
-  return minutes > 8;
-}
-
-interface Labels {
-  featured: string;
-  readArticle: string;
-  all: string;
-  categories: string;
-  expandCats: string;
-  collapseCats: string;
-  /**
-   * Counted nouns as [singular, plural]. German "Treffer" does not inflect
-   * and English "result" does, and both languages need the singular for a
-   * one-hit filter — "1 Beiträge" and "1 results" are what a hard-coded
-   * plural produces, and nothing on the page would have reported it.
-   */
-  results: readonly [string, string];
-  inCategory: readonly [string, string];
-  clear: string;
-  noResults: string;
-  empty: string;
-  older: string;
-  minRead: string;
-  filter: string;
-  length: string;
-  lengths: Record<LengthBand, string>;
-  sort: string;
-  sorts: Record<SortKey, string>;
-  resetFilters: string;
-  closeFilters: string;
-  shown: readonly [string, string];
-}
-
-/** Pick the singular for exactly one, the plural for everything else. */
-function plural(forms: readonly [string, string], n: number): string {
-  return n === 1 ? forms[0] : forms[1];
-}
-
-const LABELS: Record<"de" | "en", Labels> = {
-  de: {
-    featured: "Im Fokus",
-    readArticle: "Artikel lesen",
-    all: "Alle Beiträge",
-    categories: "Kategorien",
-    expandCats: "Kategorien ausklappen",
-    collapseCats: "Kategorien einklappen",
-    results: ["Treffer für", "Treffer für"],
-    inCategory: ["Beitrag in der Kategorie", "Beiträge in der Kategorie"],
-    clear: "Zurücksetzen",
-    noResults: "Keine Beiträge gefunden. Versuchen Sie einen anderen Suchbegriff oder Filter.",
-    empty: "Noch keine Artikel veröffentlicht.",
-    older: "Ältere Artikel",
-    minRead: "Min. Lesezeit",
-    filter: "Filter",
-    length: "Lesezeit",
-    lengths: { all: "Alle", short: "Kurz (bis 3 Min.)", medium: "Mittel (4–8 Min.)", long: "Lang (ab 9 Min.)" },
-    sort: "Sortierung",
-    sorts: { new: "Neueste", popular: "Meistgelesen" },
-    resetFilters: "Filter zurücksetzen",
-    closeFilters: "Filter schließen",
-    shown: ["Beitrag", "Beiträge"],
-  },
-  en: {
-    featured: "Featured",
-    readArticle: "Read article",
-    all: "All posts",
-    categories: "Categories",
-    expandCats: "Expand categories",
-    collapseCats: "Collapse categories",
-    results: ["result for", "results for"],
-    inCategory: ["post in category", "posts in category"],
-    clear: "Clear",
-    noResults: "No posts found. Try a different search term or filter.",
-    empty: "No articles published yet.",
-    older: "Older articles",
-    minRead: "min read",
-    filter: "Filter",
-    length: "Reading time",
-    lengths: { all: "All", short: "Short (up to 3 min)", medium: "Medium (4–8 min)", long: "Long (9+ min)" },
-    sort: "Sort",
-    sorts: { new: "Newest", popular: "Most read" },
-    resetFilters: "Reset filters",
-    closeFilters: "Close filters",
-    shown: ["post", "posts"],
-  },
-};
-
-function searchText(post: IndexPost): string {
-  return [post.title, post.excerpt, post.category, post.tags ?? ""].join(" ").toLowerCase();
-}
-
-function matchesQuery(post: IndexPost, q: string): boolean {
-  const query = q.trim().toLowerCase();
-  if (!query) return true;
-  const text = searchText(post);
-  return query.split(/\s+/).every((word) => text.includes(word));
-}
-
-function Chevron({ left }: { left?: boolean }) {
-  return (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d={left ? "M15 18l-6-6 6-6" : "M9 18l6-6-6-6"} />
-    </svg>
-  );
-}
-
-function CategorySidebar({
-  posts,
-  cats,
-  value,
-  onChange,
-  collapsed,
-  onToggle,
-  t,
-}: {
-  posts: IndexPost[];
-  cats: string[];
-  value: string;
-  onChange: (c: string) => void;
-  collapsed: boolean;
-  onToggle: () => void;
-  t: Labels;
-}) {
-  const count = (c: string) =>
-    c === "all" ? posts.length : posts.filter((p) => p.category === c).length;
-
-  if (collapsed) {
-    return (
-      <nav className="sidenav" id="blog-cat-rail" aria-label={t.categories}>
-        <button
-          type="button"
-          className="sidenav-toggle"
-          onClick={onToggle}
-          aria-label={t.expandCats}
-          aria-controls="blog-cat-rail"
-          aria-expanded="false"
-        >
-          <Chevron />
-        </button>
-      </nav>
-    );
-  }
-  return (
-    <nav className="sidenav" id="blog-cat-rail" aria-label={t.categories}>
-      <div className="sidenav-head">
-        <span>{t.categories}</span>
-        <button
-          type="button"
-          className="sidenav-toggle"
-          onClick={onToggle}
-          aria-label={t.collapseCats}
-          aria-controls="blog-cat-rail"
-          aria-expanded="true"
-        >
-          <Chevron left />
-        </button>
-      </div>
-      {/* aria-pressed, because the `on` class is the only other place the
-          selected category exists. The mobile chip strip below has carried it
-          all along, so the same filter reported its state on a phone and said
-          nothing on a desktop — the wider screen is the one with the rail. */}
-      {/* One run of tiles with 1px seams; the buttons carry no margin. */}
-      <div className="jnl-stack">
-        {["all", ...cats].map((c) => (
-          <button
-            type="button"
-            key={c}
-            className={`sidenav-item${value === c ? " on" : ""}`}
-            aria-pressed={value === c}
-            onClick={() => onChange(c)}
-          >
-            <span>{c === "all" ? t.all : c}</span>
-            <span className="cnt">{count(c)}</span>
-          </button>
-        ))}
-      </div>
-    </nav>
-  );
-}
 
 export default function BlogIndex({
   posts,
@@ -307,19 +106,7 @@ export default function BlogIndex({
   const filtering = searching || cat !== "all" || activeFilters > 0;
   const featured = posts[0];
 
-  const matches = useMemo(
-    () =>
-    {
-      const list = posts
-        .filter((p) => (cat === "all" ? true : p.category === cat))
-        .filter((p) => inBand(p.readingMinutes, band))
-        .filter((p) => matchesQuery(p, q));
-      // Array.prototype.sort is stable: equal reads keep newest-first.
-      if (sort === "popular") list.sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0));
-      return list;
-    },
-    [posts, cat, q, band, sort],
-  );
+  const matches = useMemo(() => filterPosts(posts, { cat, band, q, sort }), [posts, cat, q, band, sort]);
 
   // Unfiltered default view mirrors the static pagination: the hero
   // post plus pageSize-1 grid cards cover page 1, older posts stay
@@ -471,50 +258,18 @@ export default function BlogIndex({
                 <span className="tds-filterbar__count">{activeFilters > 0 ? activeFilters : ""}</span>
               </button>
             </div>
-            <div
-              className="tds-filterbar__panel"
-              id="blog-filter"
-              ref={filterPanel}
-              hidden={!filterOpen}
-              onKeyDown={(event) => {
-                if (event.key === "Escape") {
-                  event.preventDefault();
-                  openFilter(false);
-                }
-              }}
-            >
-              <fieldset className="tds-filterbar__group">
-                <legend className="tds-filterbar__legend">{t.length}</legend>
-                <div className="tds-toolbar">
-                  {(["all", "short", "medium", "long"] as const).map((b) => (
-                    <button type="button" key={b} className="chip" aria-pressed={band === b} onClick={() => pickBand(b)}>
-                      {t.lengths[b]}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-              <fieldset className="tds-filterbar__group">
-                <legend className="tds-filterbar__legend">{t.sort}</legend>
-                <div className="tds-toolbar">
-                  {(["new", "popular"] as const).map((k) => (
-                    <button type="button" key={k} className="chip" aria-pressed={sort === k} onClick={() => pickSort(k)}>
-                      {t.sorts[k]}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-              <button type="button" className="tds-filterbar__reset" disabled={activeFilters === 0} onClick={resetFilters}>
-                {t.resetFilters}
-              </button>
-              <button
-                type="button"
-                className="tds-filterbar__close"
-                aria-label={t.closeFilters}
-                title={t.closeFilters}
-                onClick={() => openFilter(false)}
-              />
-            </div>
-
+            <FilterPanel
+              open={filterOpen}
+              panelRef={filterPanel}
+              band={band}
+              sort={sort}
+              activeFilters={activeFilters}
+              onBand={pickBand}
+              onSort={pickSort}
+              onReset={resetFilters}
+              onClose={() => openFilter(false)}
+              t={t}
+            />
 
             {gridPosts.length === 0 ? (
               <p style={{ padding: "48px 0", color: "var(--color-muted)" }}>
