@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { readSharedStyle } from "./sharedStyle";
 
 /**
  * Layout posture tests.
@@ -52,16 +53,9 @@ const codeOf = (file: string) => stripComments(readFileSync(file, "utf8"));
  * that reads global.css alone would pass or fail for the wrong reason.
  * What matters is the CSS the page actually gets.
  */
-const SHARED = join(
-  process.cwd(),
-  "node_modules",
-  "@tracht-digital-labs",
-  "tds-shared",
-  "styles",
-);
 const effectiveCss = [
   cssCode,
-  ...["base.css", "primitives.css", "prose.css", "surfaces/blog.css"].map((f) => codeOf(join(SHARED, f))),
+  ...["base.css", "primitives.css", "prose.css", "surfaces/blog.css"].map((f) => stripComments(readSharedStyle(f))),
 ].join("\n");
 
 describe("page shell", () => {
@@ -88,7 +82,7 @@ describe("page shell", () => {
     // The width comes from the blog SURFACE in tds-shared, which the tools site
     // and the shop render too; a local copy is how the three edges drift apart
     // again. The rail is the journal's alone and is set here.
-    expect(codeOf(join(SHARED, "surfaces", "blog.css"))).toMatch(/--tds-shell-max:\s*120rem/);
+    expect(stripComments(readSharedStyle("surfaces/blog.css"))).toMatch(/--tds-shell-max:\s*120rem/);
     expect(cssCode).not.toMatch(/--tds-shell-max:/);
     expect(cssCode).toContain("--tds-rail:");
   });
