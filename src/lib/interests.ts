@@ -1,4 +1,5 @@
 import { consentGranted, onConsentChange } from "@tracht-digital-labs/tds-shared/consent/store";
+import { INTERESTS_COOKIE, bumpInterests, clearInterests, readInterests } from "./interestWeights";
 
 /**
  * The reader's topic weights behind "Für dich" and the hero's personal tab.
@@ -7,45 +8,10 @@ import { consentGranted, onConsentChange } from "@tracht-digital-labs/tds-shared
  * so it is stored only with the "Komfort" (`functional`) consent (§ 25 Abs. 1
  * TDDDG). Without it — and the moment it is withdrawn — the cookie is deleted
  * and the recommendations fall back to the generic order, which is what
- * `ForYou` and `HeroSlider` already do when the cookie is missing.
+ * `ForYou` and `HeroSlider` already do when the cookie is missing. Reading
+ * the weights and scoring posts is `interestWeights.ts`.
  */
-export const INTERESTS_COOKIE = "tds-interests";
 const MAX_AGE_S = 180 * 24 * 3600;
-const MAX_TOPICS = 12;
-const MAX_WEIGHT = 50;
-
-export function readInterests(cookie: string): Record<string, number> {
-  const match = cookie.match(/(?:^|; )tds-interests=([^;]*)/);
-  if (!match) return {};
-  try {
-    const parsed = JSON.parse(decodeURIComponent(match[1] ?? "")) as unknown;
-    if (typeof parsed !== "object" || parsed === null) return {};
-    const out: Record<string, number> = {};
-    for (const [k, v] of Object.entries(parsed)) if (typeof v === "number") out[k] = v;
-    return out;
-  } catch {
-    return {};
-  }
-}
-
-/** Add one read of each topic, keep the strongest twelve. */
-export function bumpInterests(weights: Record<string, number>, topics: readonly string[]): Record<string, number> {
-  const next = { ...weights };
-  for (const t of topics) next[t] = Math.min((next[t] ?? 0) + 1, MAX_WEIGHT);
-  return Object.fromEntries(
-    Object.entries(next)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, MAX_TOPICS),
-  );
-}
-
-function clear(): void {
-  try {
-    document.cookie = `${INTERESTS_COOKIE}=; Max-Age=0; Path=/; SameSite=Lax`;
-  } catch {
-    /* cookies disabled — nothing stored either */
-  }
-}
 
 /**
  * Count this article's topics — only with consent. Called once per article
@@ -57,7 +23,7 @@ export function trackInterests(topics: readonly string[]): () => void {
   let counted = false;
   const apply = () => {
     if (!consentGranted("functional")) {
-      clear();
+      clearInterests();
       return;
     }
     if (counted) return;

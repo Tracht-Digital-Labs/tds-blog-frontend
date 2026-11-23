@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { BookMeta } from "../PostCard";
 import { bookClass } from "../../lib/book";
+import { clearInterests, readInterests, recommend } from "../../lib/interestWeights";
 
 /**
  * "Für Sie" — interest-based recommendations on the journal index.
  *
- * Reads the `tds-interests` cookie (written by the inline script on
- * every article page: topic → weight), fetches the build-time
- * /interests-index.json and ranks posts by how strongly their
- * category + tags overlap with the profile; ties break by recency.
+ * Reads the `tds-interests` cookie (topic → weight, counted on article
+ * pages with the Komfort consent, `lib/interests.ts`), fetches the
+ * build-time /interests-index.json and ranks its posts with
+ * `recommend()` (`lib/interestWeights.ts`), the same scoring as the
+ * hero's personal tab.
  * Renders nothing when there is no profile or no scoring match, so
  * first-time visitors never see an empty shell.
  *
@@ -29,8 +31,6 @@ interface IndexedPost {
   readingMinutes?: number | null;
 }
 
-const COOKIE = "tds-interests";
-
 const LABELS = {
   de: {
     eyebrow: "Für Sie",
@@ -46,49 +46,23 @@ const LABELS = {
   },
 } as const;
 
-function readWeights(): Record<string, number> | null {
-  const match = document.cookie.match(/(?:^|; )tds-interests=([^;]*)/);
-  if (!match) return null;
-  try {
-    const parsed = JSON.parse(decodeURIComponent(match[1]));
-    return parsed && typeof parsed === "object" ? (parsed as Record<string, number>) : null;
-  } catch {
-    return null;
-  }
-}
-
-function topicsOf(post: IndexedPost): string[] {
-  return [post.category, ...(post.tags ?? "").split(",")]
-    .map((t) => t.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 export default function ForYou({ lang, limit = 3 }: { lang: "de" | "en"; limit?: number }) {
   const [picks, setPicks] = useState<IndexedPost[]>([]);
   const t = LABELS[lang];
 
   useEffect(() => {
-    const weights = readWeights();
-    if (!weights || Object.keys(weights).length === 0) return;
+    const weights = readInterests(document.cookie);
+    if (Object.keys(weights).length === 0) return;
 
     fetch("/interests-index.json")
       .then((res) => (res.ok ? (res.json() as Promise<IndexedPost[]>) : null))
       .then((all) => {
         if (!all) return;
-        const scored = all
-          .filter((p) => p.lang === lang)
-          .map((p) => ({
-            post: p,
-            score: topicsOf(p).reduce((sum, topic) => sum + (weights[topic] ?? 0), 0),
-          }))
-          .filter((s) => s.score > 0)
-          .sort(
-            (a, b) =>
-              b.score - a.score ||
-              (b.post.publishedAt ?? "").localeCompare(a.post.publishedAt ?? ""),
-          )
-          .slice(0, limit)
-          .map((s) => s.post);
+        const scored = recommend(
+          all.filter((p) => p.lang === lang),
+          weights,
+          limit,
+        );
         if (scored.length > 0) setPicks(scored);
       })
       .catch(() => {
@@ -97,7 +71,7 @@ export default function ForYou({ lang, limit = 3 }: { lang: "de" | "en"; limit?:
   }, [lang, limit]);
 
   const reset = () => {
-    document.cookie = `${COOKIE}=; Max-Age=0; Path=/; SameSite=Lax`;
+    clearInterests();
     setPicks([]);
   };
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPoi
 import { AuthorChip, fallbackAuthorName, formatPostDate, type CardPost } from "../PostCard";
 import { bookClass, bookLabel } from "../../lib/book";
 import { imageHints } from "../../lib/imageCatalog";
+import { readInterests, recommend } from "../../lib/interestWeights";
 import { PostCover } from "@tracht-digital-labs/tds-shared/components";
 
 /**
@@ -9,7 +10,7 @@ import { PostCover } from "@tracht-digital-labs/tds-shared/components";
  * a three-set carousel that rotates between:
  *
  *   • Empfohlen — interest-based picks scored from the first-party
- *     `tds-interests` cookie (same logic as the ForYou strip). The tab
+ *     `tds-interests` cookie (`recommend()`, as in the ForYou strip). The tab
  *     only appears once a reading profile exists, so first-time
  *     visitors never see an empty set.
  *   • Aktuelles — the newest posts (baked in at build time).
@@ -64,23 +65,6 @@ const LABELS: Record<"de" | "en", { intro: string; sets: Record<SetId, SetMeta>;
 
 // Drag distance (px) past which a release advances to the prev/next set.
 const DRAG_THRESHOLD = 64;
-
-function readWeights(): Record<string, number> | null {
-  const match = document.cookie.match(/(?:^|; )tds-interests=([^;]*)/);
-  if (!match) return null;
-  try {
-    const parsed = JSON.parse(decodeURIComponent(match[1]));
-    return parsed && typeof parsed === "object" ? (parsed as Record<string, number>) : null;
-  } catch {
-    return null;
-  }
-}
-
-function topicsOf(post: SliderPost): string[] {
-  return [post.category, ...(post.tags ?? "").split(",")]
-    .map((t) => t.trim().toLowerCase())
-    .filter(Boolean);
-}
 
 function prefersReducedMotion(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -230,19 +214,11 @@ export default function HeroSlider({
   useEffect(() => setReducedMotion(prefersReducedMotion()), []);
 
   // Score recommendations from the interest cookie against the baked
-  // candidate set — client-only, mirrors ForYou. No content-api call.
+  // candidate set — client-only, the same scoring as ForYou. No content-api call.
   useEffect(() => {
-    const weights = readWeights();
-    if (!weights || Object.keys(weights).length === 0) return;
-    const scored = latest
-      .map((post) => ({
-        post,
-        score: topicsOf(post).reduce((sum, topic) => sum + (weights[topic] ?? 0), 0),
-      }))
-      .filter((s) => s.score > 0)
-      .sort((a, b) => b.score - a.score || (b.post.publishedAt ?? "").localeCompare(a.post.publishedAt ?? ""))
-      .slice(0, 4)
-      .map((s) => s.post);
+    const weights = readInterests(document.cookie);
+    if (Object.keys(weights).length === 0) return;
+    const scored = recommend(latest, weights, 4);
     if (scored.length > 0) {
       setRecommended(scored);
       // Prefer the personalised set on first load, unless the visitor
