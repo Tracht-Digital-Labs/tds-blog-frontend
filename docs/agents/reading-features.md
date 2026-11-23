@@ -82,7 +82,7 @@ Wrappers over `src/components/PrintDoc.astro`, rendered `bare` + `noindex`, excl
 - `PrintControls` (a floating bar; on a phone a sticky bar with back · print · settings): page size A5/A4/A3 (a
   `size-<x>` class plus an injected `@page` rule), font size S/M/L (`--print-fs`), highlighting, and toggles for cover,
   category, summary, date, reading time, author, link, tags (cover off by default). Size, font and toggles persist in
-  localStorage.
+  localStorage. Its choices, paper geometry (`fitScale`, `pageRule`) and words sit in `islands/print/`.
 - **The sheet keeps its true size in mm** and is scaled to the screen with CSS `zoom` (`--print-scale`), never
   `max-width: 100%`. Views: Seite / Breite / 100 %.
 - **The preview is measured at true size:** `paginate()` lifts `zoom` while laying out; a heading moves to the next page
