@@ -61,6 +61,9 @@ strip, reading-progress bar, prev/next, and the consent-gated interest script (`
 - **Floating reading tools** (`.reader-tools`): zoom, focus mode, print. lg+: a column left of the text on a sticky
   anchor; below lg: a cluster bottom right above `--tds-bottom-lane` / `--tds-right-lane`. Zoom sets `--reader-zoom`
   on `<html>` (0.9–1.4, `reader_zoom`, pre-paint restore) and scales `.article-zoom` with CSS `zoom`.
+- **Behaviour lives in `src/lib/`:** `readerTools.ts` (`mountFocusMode`, `mountReaderZoom`) and `articleNav.ts`
+  (`mountArticleNav`: folding rail, collapsible sections, scroll spy, rail fade), called from `Article.astro`'s
+  scripts and tested in jsdom next to them.
 - Markdown bodies use `set:html` (admin-authored). If user content ever ships, sanitise.
 
 ## Reader focus mode
