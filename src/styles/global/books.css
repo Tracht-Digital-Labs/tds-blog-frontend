@@ -44,8 +44,7 @@
   --book-n: 15px;
   --book-stack: 1px 1px 0 var(--book-edge), 2px 2px 0 var(--book-paper), 3px 3px 0 var(--book-edge), 4px 4px 0 var(--book-paper), 5px 5px 0 var(--book-edge), 6px 6px 0 var(--book-paper), 7px 7px 0 var(--book-edge), 8px 8px 0 var(--book-paper), 9px 9px 0 var(--book-edge), 10px 10px 0 var(--book-paper), 11px 11px 0 var(--book-edge), 12px 12px 0 var(--book-paper), 13px 13px 0 var(--book-edge), 14px 14px 0 var(--book-paper), 15px 15px 0 var(--book-edge);
 }
-/* The spine: a band down the left edge, with a crease. Always visible — the
-   old hover-only accent bar grows into it on hover. */
+/* The spine: part of the drawn book, with a crease. Always visible. */
 .book::after {
   content: "";
   position: absolute;
@@ -59,7 +58,6 @@
     var(--book-spine);
   pointer-events: none;
 }
-.book.post-card::before { display: none; }
 .book:is(:hover, :focus-visible, :focus-within) {
   --book-drop: 8px;
 }

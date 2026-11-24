@@ -111,5 +111,5 @@ Wrappers over `src/components/PrintDoc.astro`, rendered `bare` + `noindex`, excl
 - **Newsletter** (`islands/NewsletterSignup.tsx`): posts a message to the contact endpoint (no newsletter backend);
   shows tds-shared's `<Spinner size="sm" />` while sending.
 - **Chrome:** `JournalHeader.astro` / `JournalFooter.astro`; nav items from `src/lib/nav.ts` (Journal, Aktuelles, RSS;
-  "Kundenportal" only in the footer). Active state is a flat accent underline / left bar.
+  "Kundenportal" only in the footer). Active state is a flat accent underline.
 - **RSS:** `/rss.xml` (DE) and `/en/rss.xml`; `/rss` explains feeds.
