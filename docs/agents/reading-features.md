@@ -45,7 +45,15 @@ draws the same artwork. Change drawings there. A photo cover is used when `cover
 ## Article page (`src/pages/[slug].astro`, EN twin)
 
 Both are wrappers over `src/components/Article.astro`: drop cap, marginalia (date, reading time, author), related
-strip, reading-progress bar, prev/next, and the consent-gated interest script (`lib/interests.ts`).
+strip, reading-progress bar, prev/next, and the consent-gated interest script (`lib/interests.ts`). Each route
+passes `onePerSlug(posts, lang)`, one entry per article in the page's language.
+
+- **Parts:** `Article.astro` resolves the data and lays out the page; its pieces live in `src/components/article/`
+  (`ArticleHeader`, `ArticleToc`, `ReaderTools`, `ArticleSection` for both body formats, `ArticleContact`,
+  `AuthorBio`, `ArticleNeighbours`, `AuthorAvatar`) with the words in `labels.ts`.
+- **Derived values are in `src/lib/`, with tests:** `articleView.ts` (plain text, citations, prev/next, the
+  "aktualisiert" date, interest topics) and `postMeta.ts` (byline fallback, initials, portrait alt, the long date,
+  word count, reading minutes). The print view, cards, hero and OG card read the same `postMeta` helpers.
 
 - **`ArticleSidebar.astro`:** fixed collapsible left nav (lg+), a 64 px icon rail when collapsed. **Collapsed by
   default**; only `reader_sidenav` = `"open"` (tds-shared prefs; old key `tds-blog-sidenav`) opens it. The pre-paint
@@ -63,9 +71,9 @@ strip, reading-progress bar, prev/next, and the consent-gated interest script (`
 - **Floating reading tools** (`.reader-tools`): zoom, focus mode, print. lg+: a column left of the text on a sticky
   anchor; below lg: a cluster bottom right above `--tds-bottom-lane` / `--tds-right-lane`. Zoom sets `--reader-zoom`
   on `<html>` (0.9–1.4, `reader_zoom`, pre-paint restore) and scales `.article-zoom` with CSS `zoom`.
-- **Behaviour lives in `src/lib/`:** `readerTools.ts` (`mountFocusMode`, `mountReaderZoom`) and `articleNav.ts`
-  (`mountArticleNav`: folding rail, collapsible sections, scroll spy, rail fade), called from `Article.astro`'s
-  scripts and tested in jsdom next to them.
+- **Behaviour lives in `src/lib/`:** `readerTools.ts` (`mountFocusMode`, `mountReaderZoom`), `articleNav.ts`
+  (`mountArticleNav`: folding rail, collapsible sections, scroll spy, rail fade) and `readingProgress.ts`
+  (`mountReadingProgress`), called from `Article.astro`'s scripts and tested in jsdom next to them.
 - Markdown bodies use `set:html` (admin-authored). If user content ever ships, sanitise.
 
 ## Reader focus mode

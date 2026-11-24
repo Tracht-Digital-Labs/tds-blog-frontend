@@ -1,0 +1,95 @@
+---
+import AuthorAvatar from "./AuthorAvatar.astro";
+import type { ArticleLabels } from "./labels";
+
+/** Category, dates and reading time, the title with its way back, the lead and the byline. */
+interface Props {
+  category: string;
+  title: string;
+  excerpt: string;
+  publishedAt: string | null;
+  updatedAt: string | null | undefined;
+  dateLabel: string;
+  updatedLabel: string | null;
+  readingMinutes: number;
+  author: { name: string; href: string | null; avatarUrl: string | null };
+  translated: boolean;
+  homeHref: string;
+  lang: "de" | "en";
+  labels: ArticleLabels;
+}
+
+const {
+  category,
+  title,
+  excerpt,
+  publishedAt,
+  updatedAt,
+  dateLabel,
+  updatedLabel,
+  readingMinutes,
+  author,
+  translated,
+  homeHref,
+  lang,
+  labels,
+} = Astro.props;
+---
+
+<header class="mb-7">
+  <div class="flex flex-wrap items-center gap-3.5 mb-3.5">
+    <p class="eyebrow" style="color: var(--color-accent);">{category}</p>
+    {/* No separator on a phone: there the date often wraps, and the square
+        would hang at the end of the first line. */}
+    <span aria-hidden="true" class="w-1 h-1 bg-[var(--color-line)] max-sm:hidden"></span>
+    {/* `<time datetime>` rather than plain text: the machine date is what
+        `dateModified` and `article:modified_time` repeat, and the audit fails
+        a date that exists only in the markup. */}
+    <p class="text-[0.8125rem] text-[var(--color-muted)] tabular">
+      {dateLabel && publishedAt && (
+        <>
+          <time datetime={publishedAt}>{dateLabel}</time> ·{" "}
+        </>
+      )}
+      ~{readingMinutes} {labels.read}
+      {updatedLabel && updatedAt && (
+        <>
+          {" · "}
+          {labels.updated} <time datetime={updatedAt}>{updatedLabel}</time>
+        </>
+      )}
+    </p>
+  </div>
+  {/* The back arrow sits directly left of the heading (hangs into the left
+      margin on lg+, inline before the title on small screens). */}
+  <div class="title-row">
+    <a href={homeHref} class="back-rail" aria-label={labels.back}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </a>
+    <h1 class="display page-title" style="text-wrap: balance;">
+      {title}
+    </h1>
+  </div>
+  <p class="lead mt-3.5 text-[var(--color-muted)]" style="text-wrap: pretty;">
+    {excerpt}
+  </p>
+  <p class="mt-4 inline-flex items-center gap-2.5">
+    <AuthorAvatar name={author.name} avatarUrl={author.avatarUrl} lang={lang} size="byline" />
+    {author.href ? (
+      <a href={author.href} class="text-[0.8125rem] font-medium link-underline">{author.name}</a>
+    ) : (
+      <span class="text-[0.8125rem] font-medium">{author.name}</span>
+    )}
+  </p>
+  {translated && (
+    <p
+      class="mt-4 text-[0.8125rem] text-[var(--color-muted)] border-l-2 pl-3"
+      style="border-color: var(--color-accent);"
+    >
+      <span aria-hidden="true">🌐 </span>{labels.machine}
+    </p>
+  )}
+</header>

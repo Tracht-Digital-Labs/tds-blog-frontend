@@ -1,0 +1,41 @@
+---
+import { authorInitials, portraitAlt } from "~/lib/postMeta";
+
+/**
+ * The author's portrait, or their initials on a tinted square when there is
+ * none. `byline` is the small one beside the name under the title; `bio` the
+ * large one in the author panel.
+ */
+interface Props {
+  name: string;
+  avatarUrl: string | null;
+  lang: "de" | "en";
+  size: "byline" | "bio";
+}
+
+const { name, avatarUrl, lang, size } = Astro.props;
+const byline = size === "byline";
+---
+
+{avatarUrl ? (
+  <img
+    src={avatarUrl}
+    alt={portraitAlt(name, lang)}
+    class={byline ? "w-7 h-7 rounded-full object-cover" : "w-16 h-16 rounded-full object-cover"}
+    width={byline ? "28" : "64"}
+    height={byline ? "28" : "64"}
+    loading="lazy"
+  />
+) : byline ? (
+  <span
+    aria-hidden="true"
+    class="w-7 h-7 inline-flex items-center justify-center text-[11px] font-semibold tracking-wide"
+    style="background: var(--tds-flat-tint); color: var(--color-primary);"
+  >{authorInitials(name)}</span>
+) : (
+  <span
+    aria-hidden="true"
+    class="w-16 h-16 inline-flex items-center justify-center text-lg font-semibold tracking-wide text-white"
+    style="background: var(--color-surface-navy); font-family: var(--font-display);"
+  >{authorInitials(name)}</span>
+)}

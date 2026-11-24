@@ -1,0 +1,62 @@
+---
+import type { ArticleLabels } from "./labels";
+
+/** The contents rail beside the article, with its fold toggle. */
+interface Props {
+  sections: Array<{ id: string; heading: string }>;
+  labels: ArticleLabels;
+}
+
+const { sections, labels } = Astro.props;
+---
+
+<nav class="toc" aria-label={labels.contents} id="article-toc">
+  <div class="toc-head">
+    <p class="eyebrow toc-title">{labels.contents}</p>
+    {/* aria-controls names the rail, not the page. The fold class lands on
+        `#main` because the collapsed styling reaches the links from there
+        (`.toc-collapsed .toc-link`), but what this button folds is the nav
+        beside the article, not the article. */}
+    <button
+      type="button"
+      class="toc-toggle"
+      id="toc-toggle"
+      aria-expanded="true"
+      aria-controls="article-toc"
+      title={labels.tocCollapse}
+      aria-label={labels.tocCollapse}
+      data-label-collapse={labels.tocCollapse}
+      data-label-expand={labels.tocExpand}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+    </button>
+  </div>
+  <ol class="toc-list jnl-stack">
+    {sections.map((sec) => (
+      <li>
+        <a href={`#${sec.id}`} data-toc={sec.id} class="toc-link">
+          <span class="toc-tick" aria-hidden="true"></span>
+          <span class="toc-label">{sec.heading}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>
+{/* Apply the saved fold state before first paint so the article column
+    doesn't jump on load. #main + #toc-toggle are already parsed at this
+    point (this runs right after the nav). */}
+<script is:inline>
+  (function () {
+    try {
+      var saved = (window.__tdsPrefs || {}).reader_toc || localStorage.getItem("tds-blog-toc");
+      if (saved === "collapsed") {
+        var m = document.getElementById("main");
+        if (m) m.classList.add("toc-collapsed");
+        var t = document.getElementById("toc-toggle");
+        if (t) t.setAttribute("aria-expanded", "false");
+      }
+    } catch (e) {
+      /* storage disabled — start expanded */
+    }
+  })();
+</script>

@@ -1,5 +1,4 @@
 ---
-import { stripProductShortcodes } from "~/lib/productShortcodes";
 /**
  * Print / PDF view of an article — a stripped, colourless rendering opened
  * in its own tab from the "Drucken" button on the article page. The whole
@@ -14,6 +13,9 @@ import PrintControls from "~/components/islands/PrintControls.tsx";
 import { siteConfig } from "~/lib/seo";
 import { blogSnippets } from "~/lib/content-api";
 import { renderBlocksToHtml } from "~/lib/renderBlock";
+import { articlePlainText } from "~/lib/articleView";
+import { countWords, fallbackAuthorName, formatPostDate, readingMinutes as minutesFor } from "~/lib/postMeta";
+import { stripProductShortcodes } from "~/lib/productShortcodes";
 import type { LocalizedPost } from "~/lib/localizedPost";
 
 interface Props {
@@ -32,23 +34,15 @@ const pfx = lang === "en" ? "/en" : "";
 const backHref = `${pfx}/${post.slug}`;
 const url = new URL(backHref, siteConfig.url).toString();
 
-const dateLabel = post.publishedAt
-  ? new Date(post.publishedAt).toLocaleDateString(lang === "de" ? "de-DE" : "en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  : null;
-
-const plain = bodyHtml.replace(/<[^>]+>/g, " ");
-const wordCount = plain.split(/\s+/).filter(Boolean).length;
-const readingMinutes = Math.max(1, Math.round(wordCount / 220));
+const dateLabel = formatPostDate(post.publishedAt, lang);
+// The article page's figure: counted from the same text, not from the HTML the
+// blocks are flattened into here, which adds button labels and captions.
+const readingMinutes = minutesFor(countWords(articlePlainText(localized)));
 
 const explicitCover = post.coverHint?.startsWith("http") ? post.coverHint : undefined;
 const tags = (post.tags ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 
-const authorName =
-  post.author?.name ?? (lang === "de" ? "Tracht Digital Redaktion" : "Tracht Digital Editorial");
+const authorName = post.author?.name ?? fallbackAuthorName(lang);
 
 const t =
   lang === "de"

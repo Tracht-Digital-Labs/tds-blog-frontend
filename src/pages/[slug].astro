@@ -1,5 +1,6 @@
 ---
 import Article from "~/components/Article.astro";
+import { onePerSlug } from "~/lib/articleView";
 import { listAllPosts } from "~/lib/content-api";
 import { resolveLocalizedPost } from "~/lib/localizedPost";
 
@@ -15,16 +16,8 @@ if (!localized) {
   return new Response(null, { status: 404 });
 }
 
-// The corpus only AFTER the post is known to exist: a 404 used to read every
-// post first.
-const allPosts = await listAllPosts();
-
-// One entry per slug for related + prev/next; prefer the DE row's metadata.
-const bySlug = new Map<string, (typeof allPosts)[number]>();
-for (const p of allPosts) {
-  if (!bySlug.has(p.slug) || p.lang === "de") bySlug.set(p.slug, p);
-}
-const posts = [...bySlug.values()];
+// The corpus only once the post is known to exist, so a 404 reads nothing.
+const posts = onePerSlug(await listAllPosts(), "de");
 ---
 
 <Article localized={localized} lang="de" posts={posts} />

@@ -23,6 +23,7 @@ import fs from "node:fs";
 import path from "node:path";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
+import { fallbackAuthorName, formatPostDate } from "../lib/postMeta";
 
 // Resolved from the project root because Astro bundles this file into dist/,
 // where `import.meta.url`-based relative paths no longer reach src/og/fonts.
@@ -81,21 +82,10 @@ export async function renderOgPng(opts: OgOptions): Promise<Buffer> {
   const { lato } = loadFonts();
 
   const { head, accent } = splitForAccent(opts.title);
-  const locale = opts.lang === "de" ? "de-DE" : "en-US";
-  const dateLabel = opts.dateLabel
-    ? opts.dateLabel
-    : opts.publishedAt
-    ? new Date(opts.publishedAt).toLocaleDateString(locale, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : opts.lang === "de"
-      ? "Entwurf"
-      : "Draft";
+  const dateLabel =
+    opts.dateLabel || formatPostDate(opts.publishedAt, opts.lang) || (opts.lang === "de" ? "Entwurf" : "Draft");
 
-  const wordmark =
-    opts.lang === "de" ? "Tracht Digital · Ratgeber" : "Tracht Digital · Ratgeber";
+  const wordmark = "Tracht Digital · Ratgeber";
 
   const svg = await satori(
     {
@@ -219,9 +209,7 @@ export async function renderOgPng(opts: OgOptions): Promise<Buffer> {
                       {
                         type: "span",
                         props: {
-                          children:
-                            opts.author ??
-                            (opts.lang === "de" ? "Tracht Digital Redaktion" : "Tracht Digital Editorial"),
+                          children: opts.author ?? fallbackAuthorName(opts.lang),
                         },
                       },
                     ],

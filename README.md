@@ -176,6 +176,7 @@ untranslated content, so authoring both languages avoids translation entirely.
 src/
 ├── components/
 │   ├── Article.astro               # shared full article view for /[slug] + /en/[slug] (lang-prefixed links)
+│   ├── article/                    # its parts: header, TOC, reader tools, section, author bio, prev/next, labels
 │   ├── ArticleSidebar.astro        # fixed collapsible left nav on /[slug] (lg+), phone icon when collapsed
 │   ├── BlogPostCard.astro          # flat editorial list row (pagination + tag pages)
 │   ├── PostCard.tsx                # flat post card (island + static render in RelatedArticles)

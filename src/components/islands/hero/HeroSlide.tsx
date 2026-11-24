@@ -1,6 +1,7 @@
 import { PostCover } from "@tracht-digital-labs/tds-shared/components";
-import { AuthorChip, fallbackAuthorName, formatPostDate } from "../../PostCard";
+import { AuthorChip } from "../../PostCard";
 import { bookClass, bookLabel } from "../../../lib/book";
+import { fallbackAuthorName, formatPostDate } from "../../../lib/postMeta";
 import { imageHints } from "../../../lib/imageCatalog";
 import type { SliderPost } from "../HeroSlider";
 import type { HeroLabels, SetMeta } from "./labels";

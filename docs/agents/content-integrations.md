@@ -49,9 +49,9 @@ connection's scopes, or reissue the key without scopes.
 ## Authors
 
 Every post carries a denormalised `post.author` (name, slug, avatar, bio). `content-api.ts` resolves the avatar to an
-absolute URL. The byline renders in `Article.astro` (header and "Über den Autor", linked), `PostCard.tsx`
-(`AuthorChip`), `PrintDoc.astro` and the OG card. A post without an author falls back to a neutral, unlinked studio
-byline (`fallbackAuthorName`).
+absolute URL. The byline renders in `article/ArticleHeader.astro` and `article/AuthorBio.astro` (linked),
+`PostCard.tsx` (`AuthorChip`), `PrintDoc.astro` and the OG card. A post without an author falls back to a neutral,
+unlinked studio byline (`fallbackAuthorName` in `lib/postMeta.ts`).
 
 **Author pages** `src/pages/autor/[slug].astro` and `src/pages/en/author/[slug].astro`: profile header plus the
 `AuthorPostList` island with a sort control (Datum / Aufrufe / Trend = `viewCount / max(1, days since publishedAt)`).

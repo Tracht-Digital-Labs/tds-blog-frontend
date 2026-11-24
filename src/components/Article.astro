@@ -1,5 +1,4 @@
 ---
-import { imageHints } from "~/lib/imageCatalog";
 /**
  * Full article view, shared by the DE (`/[slug]`) and EN (`/en/[slug]`)
  * routes. Receives an already-localized post (authored or machine-
@@ -14,9 +13,26 @@ import TagList from "~/components/TagList.astro";
 import AdSlot from "~/components/AdSlot.astro";
 import BlockRenderer from "~/components/BlockRenderer.astro";
 import ProductEmbed from "~/components/ProductEmbed.astro";
+import ArticleContact from "~/components/article/ArticleContact.astro";
+import ArticleHeader from "~/components/article/ArticleHeader.astro";
+import ArticleNeighbours from "~/components/article/ArticleNeighbours.astro";
+import ArticleSection from "~/components/article/ArticleSection.astro";
+import ArticleToc from "~/components/article/ArticleToc.astro";
+import AuthorBio from "~/components/article/AuthorBio.astro";
+import ReaderTools from "~/components/article/ReaderTools.astro";
+import { LABELS } from "~/components/article/labels";
 import { adsConfig, effectiveAdsMode, blogSnippets } from "~/lib/content-api";
+import {
+  articleCitations,
+  articlePlainText,
+  chronologicalNeighbours,
+  interestTopics,
+  laterUpdateLabel,
+  type ArticlePostRef,
+} from "~/lib/articleView";
 import { blogPostingSchema, breadcrumbSchema, faqPageSchema, organizationSchema } from "~/lib/jsonld";
-import { splitProductShortcodes, stripProductShortcodes } from "~/lib/productShortcodes";
+import { imageHints } from "~/lib/imageCatalog";
+import { splitProductShortcodes } from "~/lib/productShortcodes";
 import { faqFromSections } from "~/lib/articleFaq";
 import { splitSections } from "~/lib/sections";
 import { splitBlockSections } from "~/lib/blockSections";
@@ -24,18 +40,19 @@ import { authorHref, categoryHref } from "~/lib/nav";
 import { categorySlug } from "~/lib/taxonomy";
 import { pageTitle, siteConfig } from "~/lib/seo";
 import { postDescription } from "~/lib/metaDescription";
+import { countWords, fallbackAuthorName, formatPostDate, readingMinutes as minutesFor } from "~/lib/postMeta";
 import type { LocalizedPost } from "~/lib/localizedPost";
-import type { BlogPost } from "@tracht-digital-labs/tds-shared";
 
 interface Props {
   localized: LocalizedPost;
   lang: "de" | "en";
   /** One entry per distinct slug, for related + prev/next. */
-  posts: Array<Pick<BlogPost, "slug" | "lang" | "category" | "title" | "excerpt" | "coverHint" | "tags" | "publishedAt" | "author">>;
+  posts: ArticlePostRef[];
 }
 
 const { localized, lang, posts } = Astro.props;
 const { post, bodyHtml, blocks, translated } = localized;
+const labels = LABELS[lang];
 
 // Two body formats: a block post carries a parsed `blocks` array (rendered by
 // BlockRenderer), a legacy markdown post carries `bodyHtml`.
@@ -52,173 +69,53 @@ const showManualAds = adsMode === "manual" && !isBlocks;
 const showBlockAds = adsMode !== "off";
 
 const pfx = lang === "en" ? "/en" : "";
-const postHref = (slug: string) => `${pfx}/${slug}`;
+const homeHref = `${pfx}/`;
+const printHref = `${pfx}/${post.slug}/print`;
 
 // Unified section model for the TOC + collapsible bodies. Both formats split at
 // level-2 headings; the body of each is rendered format-appropriately below.
 const mdSplit = isBlocks ? { intro: "", sections: [] } : splitSections(bodyHtml);
-const blkSplit = isBlocks ? splitBlockSections(blocks!) : { intro: [], sections: [] };
-const sections = isBlocks
-  ? blkSplit.sections.map((s) => ({ id: s.id, heading: s.heading }))
-  : mdSplit.sections.map((s) => ({ id: s.id, heading: s.heading }));
-const intro = mdSplit.intro;
+const blkSplit = isBlocks ? splitBlockSections(blocks) : { intro: [], sections: [] };
+const sections = (isBlocks ? blkSplit.sections : mdSplit.sections).map((s) => ({ id: s.id, heading: s.heading }));
 // `{{produkt:slug}}` paragraphs become product cards between the prose parts
-// (see productShortcodes.ts); everything else renders exactly as before.
-const introParts = splitProductShortcodes(intro);
+// (see productShortcodes.ts).
+const introParts = splitProductShortcodes(mdSplit.intro);
 const sectionParts = mdSplit.sections.map((sec) => ({ ...sec, parts: splitProductShortcodes(sec.html) }));
 // The article's own FAQ section, as FAQPage — from the rendered text only.
 const faq = isBlocks ? [] : faqFromSections(mdSplit.sections);
 const showToc = sections.length >= 2;
 
-// Chronological neighbours over the distinct-slug list (every post is
-// reachable in this language, authored or translated).
-const ordered = [...posts].sort(
-  (a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""),
-);
-const orderedIdx = ordered.findIndex((p) => p.slug === post.slug);
-const newerPost = orderedIdx > 0 ? ordered[orderedIdx - 1] : null;
-const olderPost =
-  orderedIdx >= 0 && orderedIdx < ordered.length - 1 ? ordered[orderedIdx + 1] : null;
+const { newer, older } = chronologicalNeighbours(posts, post.slug);
 
-const interestTopics = Array.from(
-  new Set(
-    [post.category, ...(post.tags ?? "").split(",")]
-      .map((t) => t.trim().toLowerCase())
-      .filter(Boolean),
-  ),
-);
 const explicitCover = post.coverHint?.startsWith("http") ? post.coverHint : undefined;
+const cover = explicitCover ? imageHints(explicitCover, lang) : undefined;
 
-const dateLabel = post.publishedAt
-  ? new Date(post.publishedAt).toLocaleDateString(lang === "de" ? "de-DE" : "en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  : null;
-
-// Word count from the rendered HTML (markdown) or the block text fields.
-const plain = isBlocks
-  ? blocks!
-      .map((b) => {
-        if (b.type === "paragraph" || b.type === "heading" || b.type === "quote" || b.type === "callout") return b.text;
-        if (b.type === "list") return b.items.join(" ");
-        if (b.type === "code") return b.code;
-        return "";
-      })
-      .join(" ")
-  : stripProductShortcodes(bodyHtml).replace(/<[^>]+>/g, " ");
-const wordCount = plain.split(/\s+/).filter(Boolean).length;
-const readingMinutes = Math.max(1, Math.round(wordCount / 220));
-
-/**
- * The outside sources this article links to, for the graph's `citation`.
- *
- * Read off the RENDERED body, which is the only honest source: every entry is
- * a link a reader can see and follow, so there is nothing here to invent. A
- * markdown post yields them from its HTML; a blocks post from its button
- * blocks, which is where a block article puts an outbound link.
- *
- * Capped, de-duplicated, and anything on a tracht-digital.de host dropped —
- * citing ourselves is not a source.
- */
-const citations = Array.from(
-  new Set(
-    [
-      ...(isBlocks
-        ? blocks!.flatMap((b) => (b.type === "button" && b.href ? [b.href] : []))
-        : [...bodyHtml.matchAll(/href="(https?:\/\/[^"]+)"/g)].map((m) => m[1]!)),
-    ].filter((href) => {
-      try {
-        return !new URL(href).hostname.endsWith("tracht-digital.de");
-      } catch {
-        return false;
-      }
-    }),
-  ),
-).slice(0, 10);
-
-/**
- * When the text last changed, if that is later than publication.
- *
- * `dateModified` and `article:modified_time` have named `updatedAt` all along
- * while the page showed only the publication date — a freshness claim in the
- * markup with nothing on the page to back it. Shown only when it really is
- * later: an "updated" line on the day of publication is noise.
- */
-const updatedLabel =
-  post.updatedAt && post.publishedAt && Date.parse(post.updatedAt) > Date.parse(post.publishedAt)
-    ? new Date(post.updatedAt).toLocaleDateString(lang === "de" ? "de-DE" : "en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : null;
+const plain = articlePlainText(localized);
+const wordCount = countWords(plain);
+const readingMinutes = minutesFor(wordCount);
 
 const ogImagePath = explicitCover ?? `/og/${lang}/${post.slug}.png`;
-const imageUrl = ogImagePath.startsWith("http")
-  ? ogImagePath
-  : new URL(ogImagePath, siteConfig.url).toString();
+const imageUrl = ogImagePath.startsWith("http") ? ogImagePath : new URL(ogImagePath, siteConfig.url).toString();
+const postUrl = new URL(`${pfx}/${post.slug}`, siteConfig.url).toString();
 
-const journalLabel = "Ratgeber";
-const journalHomeUrl = `${siteConfig.url}${pfx}/`;
-const postUrl = new URL(postHref(post.slug), siteConfig.url).toString();
-
-// Contact CTA target: the landingpage's contact form anchor, language-aware
-// (the EN landingpage lives under /en/) so EN readers land on the EN form.
+// The landingpage's contact form, language-aware (its EN page lives under /en/).
 const contactUrl = `https://tracht-digital.de${pfx}/#contact`;
 
 // One resolved description for the head and the graph. JSON-LD that disagrees
 // with the rendered meta description is a mismatch Google reports.
 const metaDesc = postDescription(post.metaDescription, post.excerpt, lang);
 
-const tx = lang === "de"
-  ? {
-      back: "Alle Beiträge", read: "Min. Lesezeit", updated: "aktualisiert", contents: "Inhalt",
-      tocCollapse: "Inhalt einklappen", tocExpand: "Inhalt ausklappen",
-      aboutAuthor: "Über den Autor", owner: "Inhaber, Tracht Digital Solutions",
-      bio: "Entwickelt Software, Websites und Digitalisierungslösungen für kleine und mittlere Unternehmen, ansässig in Schwarzenbek bei Hamburg.",
-      newer: "Neuerer Artikel", older: "Älterer Artikel", nav: "Artikel-Navigation",
-      allArticles: "Alle Artikel", rss: "RSS abonnieren", print: "Drucken",
-      tools: "Lesewerkzeuge", zoomIn: "Text vergrößern", zoomOut: "Text verkleinern",
-      focus: "Fokusmodus", focusTitle: "Fokusmodus (Taste F)",
-      machine: "Automatisch übersetzt, das Original ist auf Englisch verfasst.",
-      contactHead: "Zusammenarbeiten",
-      contactLead: "Ich baue Websites, Webshops und individuelle Lösungen für Selbstständige, kleine Unternehmen und lokale Betriebe, aus Schwarzenbek bei Hamburg.",
-      contactCta: "Unverbindlich anfragen",
-    }
-  : {
-      back: "All posts", read: "min read", updated: "updated", contents: "Contents",
-      tocCollapse: "Collapse contents", tocExpand: "Expand contents",
-      aboutAuthor: "About the author", owner: "Owner, Tracht Digital Solutions",
-      bio: "Builds software, websites and digitalization solutions for small and medium-sized businesses, based in Schwarzenbek near Hamburg.",
-      newer: "Newer article", older: "Older article", nav: "Article navigation",
-      allArticles: "All articles", rss: "Subscribe via RSS", print: "Print",
-      tools: "Reading tools", zoomIn: "Larger text", zoomOut: "Smaller text",
-      focus: "Focus mode", focusTitle: "Focus mode (press F)",
-      machine: "Machine-translated, the original is written in German.",
-      contactHead: "Work together",
-      contactLead: "I build websites, online shops and custom solutions for freelancers, small companies and local businesses, from Schwarzenbek near Hamburg.",
-      contactCta: "Get in touch",
-    };
+// A real author links to its author page and shows its own name, avatar and
+// bio; a post without one (deleted user, legacy content) keeps the byline as
+// the studio's, unlinked.
+const byline = {
+  name: post.author?.name ?? fallbackAuthorName(lang),
+  href: post.author ? authorHref(lang, post.author.slug) : null,
+  avatarUrl: post.author?.avatarUrl ?? null,
+  bio: post.author?.bio ?? labels.bio,
+};
 
-// Author byline. A real author links to its author page and shows its own
-// name/avatar/bio; a post without an author (deleted user, or legacy content)
-// falls back to a neutral studio byline — the byline stays, just unlinked.
-const author = post.author ?? null;
-const authorName = author?.name ?? (lang === "de" ? "Tracht Digital Redaktion" : "Tracht Digital Editorial");
-const authorPageHref = author ? authorHref(lang, author.slug) : null;
-const authorAvatar = author?.avatarUrl ?? null;
-const authorBio = author?.bio ?? tx.bio;
-const authorInitials = authorName
-  .split(/\s+/)
-  .map((w) => w[0] ?? "")
-  .join("")
-  .slice(0, 2)
-  .toUpperCase() || "TD";
-
-// Built after the byline on purpose: the graph names the SAME author the page
-// shows. It used to be assembled further up and could only name the site owner.
+// The graph names the same author the page shows.
 const jsonLd = [
   blogPostingSchema({
     slug: post.slug,
@@ -232,26 +129,20 @@ const jsonLd = [
     imageUrl,
     wordCount,
     readingMinutes,
-    citations,
-    author: author
-      ? { name: author.name, url: authorPageHref ? new URL(authorPageHref, siteConfig.url).toString() : null }
+    citations: articleCitations(localized),
+    author: post.author
+      ? { name: post.author.name, url: byline.href ? new URL(byline.href, siteConfig.url).toString() : null }
       : null,
     tags: post.tags,
   }),
   organizationSchema(),
   breadcrumbSchema([
-    { name: journalLabel, url: journalHomeUrl },
-    // The category crumb pointed at the journal home, which made the trail
-    // claim two different names for one URL. It has a page of its own.
-    {
-      name: post.category,
-      url: new URL(categoryHref(lang, categorySlug(post.category)), siteConfig.url).toString(),
-    },
+    { name: "Ratgeber", url: `${siteConfig.url}${homeHref}` },
+    { name: post.category, url: new URL(categoryHref(lang, categorySlug(post.category)), siteConfig.url).toString() },
     { name: post.title, url: postUrl },
   ]),
   ...(faq.length > 0 ? [faqPageSchema(faq)] : []),
 ];
-
 ---
 
 <Layout
@@ -262,7 +153,7 @@ const jsonLd = [
   article={{
     publishedTime: post.publishedAt,
     modifiedTime: post.updatedAt,
-    author: authorName,
+    author: byline.name,
     section: post.category,
     slug: post.slug,
   }}
@@ -270,7 +161,7 @@ const jsonLd = [
   sidebar
   focusable
   adsMode={adsMode}
-  reader={{ printHref: `${pfx}/${post.slug}/print` }}
+  reader={{ printHref }}
   hasToc={showToc}
 >
   <div
@@ -287,195 +178,47 @@ const jsonLd = [
       showToc && "has-toc",
     ]}
   >
-    {showToc && (
-      <>
-        <nav class="toc" aria-label={tx.contents} id="article-toc">
-          <div class="toc-head">
-            <p class="eyebrow toc-title">{tx.contents}</p>
-            {/* aria-controls names the rail, not the page. The fold class
-                lands on `#main` because the collapsed styling reaches the
-                links from there (`.toc-collapsed .toc-link`) — but what this
-                button expands and collapses is the nav beside the article.
-                Pointing it at `#main` told assistive tech the control folded
-                away the entire article. */}
-            <button
-              type="button"
-              class="toc-toggle"
-              id="toc-toggle"
-              aria-expanded="true"
-              aria-controls="article-toc"
-              title={tx.tocCollapse}
-              aria-label={tx.tocCollapse}
-              data-label-collapse={tx.tocCollapse}
-              data-label-expand={tx.tocExpand}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
-            </button>
-          </div>
-          <ol class="toc-list jnl-stack">
-            {sections.map((sec) => (
-              <li>
-                <a href={`#${sec.id}`} data-toc={sec.id} class="toc-link">
-                  <span class="toc-tick" aria-hidden="true"></span>
-                  <span class="toc-label">{sec.heading}</span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-        {/* Apply the saved fold state before first paint so the article
-            column doesn't jump on load. #main + #toc-toggle are already
-            parsed at this point (this runs right after the nav). */}
-        <script is:inline>
-          (function () {
-            try {
-              var saved = (window.__tdsPrefs || {}).reader_toc || localStorage.getItem("tds-blog-toc");
-              if (saved === "collapsed") {
-                var m = document.getElementById("main");
-                if (m) m.classList.add("toc-collapsed");
-                var t = document.getElementById("toc-toggle");
-                if (t) t.setAttribute("aria-expanded", "false");
-              }
-            } catch (e) {
-              /* storage disabled — start expanded */
-            }
-          })();
-        </script>
-      </>
-    )}
+    {showToc && <ArticleToc sections={sections} labels={labels} />}
 
     <article class="article-col">
       {/* The reading frame: header + body at a reading measure (~70
           characters), scaled as one by the reader's zoom. Everything after it
           (contact, author, related, prev/next) keeps the normal column. */}
       <div class="article-read">
-      <div class="article-zoom">
-      <header class="mb-7">
-        <div class="flex flex-wrap items-center gap-3.5 mb-3.5">
-          <p class="eyebrow" style="color: var(--color-accent);">{post.category}</p>
-          {/* No separator on a phone: there the date often wraps, and the
-              square was left hanging at the end of the first line. */}
-          <span aria-hidden="true" class="w-1 h-1 bg-[var(--color-line)] max-sm:hidden"></span>
-          {/* `<time datetime>` rather than plain text: the machine date is
-              what `dateModified` and `article:modified_time` repeat, and the
-              audit fails a date that exists only in the markup. */}
-          <p class="text-[0.8125rem] text-[var(--color-muted)] tabular">
-            {dateLabel && post.publishedAt && (
-              <>
-                <time datetime={post.publishedAt}>{dateLabel}</time> ·{" "}
-              </>
-            )}
-            ~{readingMinutes} {tx.read}
-            {updatedLabel && post.updatedAt && (
-              <>
-                {" · "}
-                {tx.updated} <time datetime={post.updatedAt}>{updatedLabel}</time>
-              </>
-            )}
-          </p>
-        </div>
-        {/* Back arrow sits directly left of the heading (hangs into the left
-            margin on lg+; inline before the title on small screens). */}
-        <div class="title-row">
-          <a href={`${pfx}/`} class="back-rail" aria-label={tx.back}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-          </a>
-          <h1 class="display page-title" style="text-wrap: balance;">
-            {post.title}
-          </h1>
-        </div>
-        <p class="lead mt-3.5 text-[var(--color-muted)]" style="text-wrap: pretty;">
-          {post.excerpt}
-        </p>
-        <p class="mt-4 inline-flex items-center gap-2.5">
-          {authorAvatar ? (
+        <div class="article-zoom">
+          <ArticleHeader
+            category={post.category}
+            title={post.title}
+            excerpt={post.excerpt}
+            publishedAt={post.publishedAt}
+            updatedAt={post.updatedAt}
+            dateLabel={formatPostDate(post.publishedAt, lang)}
+            updatedLabel={laterUpdateLabel(post.publishedAt, post.updatedAt, lang)}
+            readingMinutes={readingMinutes}
+            author={byline}
+            translated={translated}
+            homeHref={homeHref}
+            lang={lang}
+            labels={labels}
+          />
+          {explicitCover && (
             <img
-              src={authorAvatar}
-              alt={lang === "de" ? `Porträt von ${authorName}` : `Portrait of ${authorName}`}
-              class="w-7 h-7 rounded-full object-cover"
-              width="28"
-              height="28"
-              loading="lazy"
+              src={explicitCover}
+              alt={cover?.alt ?? post.title}
+              srcset={cover?.srcSet}
+              sizes="(min-width: 64rem) 65vw, 100vw"
+              width={cover?.width ?? 1440}
+              height={cover?.height ?? 960}
+              loading="eager"
+              decoding="async"
+              class="w-full aspect-[3/2] object-cover mb-7"
             />
-          ) : (
-            <span
-              aria-hidden="true"
-              class="w-7 h-7 inline-flex items-center justify-center text-[11px] font-semibold tracking-wide"
-              style="background: var(--tds-flat-tint); color: var(--color-primary);"
-            >{authorInitials}</span>
           )}
-          {authorPageHref ? (
-            <a href={authorPageHref} class="text-[0.8125rem] font-medium link-underline">{authorName}</a>
-          ) : (
-            <span class="text-[0.8125rem] font-medium">{authorName}</span>
-          )}
-        </p>
-        {translated && (
-          <p
-            class="mt-4 text-[0.8125rem] text-[var(--color-muted)] border-l-2 pl-3"
-            style="border-color: var(--color-accent);"
-          >
-            <span aria-hidden="true">🌐 </span>{tx.machine}
-          </p>
-        )}
-      </header>
-      {explicitCover && (
-        <img
-          src={explicitCover}
-          alt={imageHints(explicitCover, lang)?.alt ?? post.title}
-          srcset={imageHints(explicitCover, lang)?.srcSet}
-          sizes="(min-width: 64rem) 65vw, 100vw"
-          width={imageHints(explicitCover, lang)?.width ?? 1440}
-          height={imageHints(explicitCover, lang)?.height ?? 960}
-          loading="eager"
-          decoding="async"
-          class="w-full aspect-[3/2] object-cover mb-7"
-        />
-      )}
-      </div>
-
-      {/* Floating reading tools. A zero-height sticky anchor: on lg+ the bar
-          hangs in the left margin of the text and travels with it until the
-          article ends; below lg it is a small fixed cluster bottom-right.
-          Deliberately quiet (faint until hovered or focused) so it never
-          competes with the text. */}
-      <div class="reader-tools-anchor">
-        <div class="reader-tools" role="toolbar" aria-label={tx.tools} aria-orientation="vertical">
-          <button type="button" class="reader-tool" id="zoom-in" aria-label={tx.zoomIn} title={tx.zoomIn}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path><path d="M11 8v6"></path><path d="M8 11h6"></path>
-            </svg>
-          </button>
-          <button type="button" class="reader-tool" id="zoom-out" aria-label={tx.zoomOut} title={tx.zoomOut}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path><path d="M8 11h6"></path>
-            </svg>
-          </button>
-          {/* Reader focus mode — hides all chrome for distraction-free reading.
-              Toggled here or with the `f` key; state persists per reader. */}
-          <button type="button" class="reader-tool" id="focus-toggle" aria-pressed="false" aria-label={tx.focus} title={tx.focusTitle}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-              <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-              <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-              <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-            </svg>
-          </button>
-          {/* Opens the colourless print / PDF view in its own tab. */}
-          <a href={`${pfx}/${post.slug}/print`} target="_blank" rel="noopener" class="reader-tool" aria-label={tx.print} title={tx.print}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M6 9V2h12v7"></path>
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-              <path d="M6 14h12v8H6z"></path>
-            </svg>
-          </a>
         </div>
-      </div>
 
-      <div class="article-zoom mt-4 pb-10">
+        <ReaderTools printHref={printHref} labels={labels} />
+
+        <div class="article-zoom mt-4 pb-10">
           {isBlocks ? (
             blkSplit.intro.length > 0 && (
               <BlockRenderer blocks={blkSplit.intro} ads={ads} showAds={showBlockAds} lang={lang} snippets={snippets} dropCap />
@@ -494,160 +237,65 @@ const jsonLd = [
           )}
           {isBlocks
             ? blkSplit.sections.map((sec) => (
-                <section class="article-sec">
-                  <h2 id={sec.id}>
-                    <button class="sec-head" aria-expanded="true" aria-controls={`${sec.id}-body`}>
-                      <span>{sec.heading}</span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
-                    </button>
-                  </h2>
-                  <div class="sec-body" id={`${sec.id}-body`}>
-                    <div class="sec-body-inner">
-                      <BlockRenderer blocks={sec.blocks} ads={ads} showAds={showBlockAds} lang={lang} snippets={snippets} />
-                    </div>
-                  </div>
-                </section>
+                <ArticleSection id={sec.id} heading={sec.heading}>
+                  <BlockRenderer blocks={sec.blocks} ads={ads} showAds={showBlockAds} lang={lang} snippets={snippets} />
+                </ArticleSection>
               ))
             : sectionParts.map((sec) => (
-                <section class="article-sec">
-                  <h2 id={sec.id}>
-                    <button class="sec-head" aria-expanded="true" aria-controls={`${sec.id}-body`}>
-                      <span>{sec.heading}</span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
-                    </button>
-                  </h2>
-                  <div class="sec-body" id={`${sec.id}-body`}>
-                    <div class="sec-body-inner">
-                      {sec.parts.map((part) =>
-                        part.kind === "html" ? (
-                          <div class="tds-prose" set:html={part.html}></div>
-                        ) : (
-                          <ProductEmbed slug={part.slug} variant={part.variant} lang={lang} />
-                        ),
-                      )}
-                    </div>
-                  </div>
-                </section>
+                <ArticleSection id={sec.id} heading={sec.heading}>
+                  {sec.parts.map((part) =>
+                    part.kind === "html" ? (
+                      <div class="tds-prose" set:html={part.html}></div>
+                    ) : (
+                      <ProductEmbed slug={part.slug} variant={part.variant} lang={lang} />
+                    ),
+                  )}
+                </ArticleSection>
               ))}
-
           {showManualAds && ads.slotEndArticle && (
             <AdSlot client={ads.publisherId} slot={ads.slotEndArticle} lang={lang} />
           )}
-      </div>
+        </div>
       </div>
 
-      {/* The end of the article is one flush stack of panels instead of boxes
-          spaced out on the page ground: contact (bordeaux), author (tint),
-          products (sand), related (tint), tags (sand), prev/next (tint), links
-          (sand). The 1px seams come from .jnl-article-end, and a component with
-          nothing to show renders no panel at all. `focus-hide` stays per panel,
-          because reader focus mode removes every piece of chrome. */}
+      {/* The end of the article is one flush stack of panels: contact
+          (bordeaux), author (tint), products (sand), related (tint), tags
+          (sand), prev/next (tint), links (sand). The 1px seams come from
+          .jnl-article-end, and a component with nothing to show renders no
+          panel at all. `focus-hide` stays per panel, because reader focus mode
+          removes every piece of chrome. */}
       <div class="jnl-article-end">
-          <aside
-            class="focus-hide jnl-panel jnl-tone-accent flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-            aria-label={tx.contactHead}
-          >
-            <div>
-              <p class="eyebrow mb-1.5">{tx.contactHead}</p>
-              <p class="text-sm text-[var(--color-muted)]" style="max-width: 44ch; text-wrap: pretty;">
-                {tx.contactLead}
-              </p>
-            </div>
-            <a href={contactUrl} class="btn-flat shrink-0" data-track="article-contact">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="2" y="4" width="20" height="16"></rect>
-                <path d="m22 6-10 7L2 6"></path>
-              </svg>
-              <span>{tx.contactCta}</span>
-            </a>
-          </aside>
+        <ArticleContact href={contactUrl} labels={labels} />
 
-          {/* Author bio sits below the contact CTA (moved further down). */}
-          <aside class="focus-hide jnl-panel jnl-tone-tint grid grid-cols-[64px_1fr] gap-5 items-start">
-            {authorAvatar ? (
-              <img
-                src={authorAvatar}
-                alt={lang === "de" ? `Porträt von ${authorName}` : `Portrait of ${authorName}`}
-                class="w-16 h-16 rounded-full object-cover"
-                width="64"
-                height="64"
-                loading="lazy"
-              />
-            ) : (
-              <span
-                aria-hidden="true"
-                class="w-16 h-16 inline-flex items-center justify-center text-lg font-semibold tracking-wide text-white"
-                style="background: var(--color-surface-navy); font-family: var(--font-display);"
-              >{authorInitials}</span>
-            )}
-            <div>
-              <p class="eyebrow mb-2">{tx.aboutAuthor}</p>
-              <p class="font-semibold">
-                {authorPageHref ? (
-                  <a href={authorPageHref} class="link-underline">{authorName}</a>
-                ) : (
-                  authorName
-                )}
-                {!author && (
-                  <span class="font-normal text-sm text-[var(--color-muted)]">· {tx.owner}</span>
-                )}
-              </p>
-              <p class="text-sm leading-relaxed text-[var(--color-muted)] mt-2" style="text-wrap: pretty;">
-                {authorBio}
-              </p>
-            </div>
-          </aside>
+        <AuthorBio author={byline} fallback={!post.author} lang={lang} labels={labels} />
 
-          {/* Products before the related articles, not after: the reader who has
-              finished the piece is at their most interested here, and the related
-              strip is the natural end of the page. `focus-hide` because reader
-              focus mode removes every piece of chrome, and advertising is chrome.
-              The class goes on the component, not on a wrapper: an empty wrapper
-              would still be a grid item and double the seam. */}
-          <ProductSlot class="focus-hide" slotKey="blog-article-end" lang={lang} category={post.category} />
+        {/* Products before the related articles: the reader who has finished
+            the piece is at their most interested here, and the related strip
+            is the natural end of the page. The class goes on the component,
+            not on a wrapper: an empty wrapper would still be a grid item and
+            double the seam. */}
+        <ProductSlot class="focus-hide" slotKey="blog-article-end" lang={lang} category={post.category} />
 
-          <RelatedArticles
-            class="focus-hide"
-            posts={posts}
-            currentSlug={post.slug}
-            currentCategory={post.category}
-            lang={lang}
-          />
+        <RelatedArticles
+          class="focus-hide"
+          posts={posts}
+          currentSlug={post.slug}
+          currentCategory={post.category}
+          lang={lang}
+        />
 
-          {/* Tags moved further down — below the related-articles strip. */}
-          <TagList class="focus-hide jnl-panel jnl-tone-sand" tags={post.tags} lang={lang} label="Tags" />
+        <TagList class="focus-hide jnl-panel jnl-tone-sand" tags={post.tags} lang={lang} label="Tags" />
 
-          {(newerPost || olderPost) && (
-            <nav class="focus-hide jnl-panel jnl-tone-tint grid sm:grid-cols-2 gap-px" aria-label={tx.nav}>
-              {newerPost ? (
-                <a href={postHref(newerPost.slug)} class="jnl-tile block px-5 py-4 group">
-                  <p class="eyebrow mb-2">← {tx.newer}</p>
-                  <p class="display-tight text-lg group-hover:text-[var(--color-primary)] transition-colors">
-                    {newerPost.title}
-                  </p>
-                </a>
-              ) : (
-                <span class="hidden sm:block" aria-hidden="true"></span>
-              )}
-              {olderPost && (
-                <a href={postHref(olderPost.slug)} class="jnl-tile block px-5 py-4 group sm:text-right">
-                  <p class="eyebrow mb-2">{tx.older} →</p>
-                  <p class="display-tight text-lg group-hover:text-[var(--color-primary)] transition-colors">
-                    {olderPost.title}
-                  </p>
-                </a>
-              )}
-            </nav>
-          )}
+        <ArticleNeighbours newer={newer} older={older} pfx={pfx} labels={labels} />
 
-          <footer class="jnl-panel jnl-tone-sand flex flex-wrap items-baseline justify-between gap-4 text-sm">
-            <a href={`${pfx}/`} class="link-underline text-[var(--color-accent)]">
-              ← {tx.allArticles}
-            </a>
-            <a href={`${pfx}/rss`} class="link-underline text-[var(--color-muted)]">
-              {tx.rss}
-            </a>
-          </footer>
+        <footer class="jnl-panel jnl-tone-sand flex flex-wrap items-baseline justify-between gap-4 text-sm">
+          <a href={homeHref} class="link-underline text-[var(--color-accent)]">
+            ← {labels.allArticles}
+          </a>
+          <a href={`${pfx}/rss`} class="link-underline text-[var(--color-muted)]">
+            {labels.rss}
+          </a>
+        </footer>
       </div>
     </article>
   </main>
@@ -666,23 +314,15 @@ const jsonLd = [
   </script>
 
   <script>
-    const bar = document.getElementById("reading-progress");
-    if (bar) {
-      const update = () => {
-        const doc = document.documentElement;
-        const max = doc.scrollHeight - doc.clientHeight;
-        bar.style.transform = `scaleX(${max > 0 ? doc.scrollTop / max : 0})`;
-      };
-      addEventListener("scroll", update, { passive: true });
-      addEventListener("resize", update, { passive: true });
-      update();
-    }
+    import { mountReadingProgress } from "~/lib/readingProgress";
+
+    mountReadingProgress();
   </script>
 
   {/* Topics for "Für dich", counted only with the "Komfort" consent —
       see lib/interests.ts. The data rides in an attribute because a
       bundled script cannot take `define:vars`. */}
-  <div hidden data-interest-topics={JSON.stringify(interestTopics)}></div>
+  <div hidden data-interest-topics={JSON.stringify(interestTopics(post))}></div>
   <script>
     import { trackInterests } from "~/lib/interests";
 
@@ -693,5 +333,4 @@ const jsonLd = [
       /* malformed topics — recommendations stay generic */
     }
   </script>
-
 </Layout>
