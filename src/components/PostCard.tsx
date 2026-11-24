@@ -1,6 +1,7 @@
 import { imageHints } from "../lib/imageCatalog";
 import { PostCover } from "@tracht-digital-labs/tds-shared/components";
 import { bookClass, bookLabel } from "../lib/book";
+import { authorInitials, fallbackAuthorName, formatPostDate, portraitAlt } from "../lib/postMeta";
 
 /**
  * Flat post card from the design-system blog kit: cover block on top,
@@ -30,22 +31,6 @@ export interface CardPost {
   readingMinutes?: number | null;
 }
 
-/** Neutral byline for a post whose author is missing (deleted user / legacy). */
-export function fallbackAuthorName(lang: "de" | "en"): string {
-  return lang === "de" ? "Tracht Digital Redaktion" : "Tracht Digital Editorial";
-}
-
-function initialsOf(name: string): string {
-  return (
-    name
-      .split(/\s+/)
-      .map((w) => w[0] ?? "")
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "TD"
-  );
-}
-
 export function AuthorChip({
   inverse,
   name = "Tracht Digital",
@@ -62,7 +47,7 @@ export function AuthorChip({
       {avatarUrl ? (
         <img
           src={avatarUrl}
-          alt={lang === "de" ? `Porträt von ${name}` : `Portrait of ${name}`}
+          alt={portraitAlt(name, lang)}
           width={28}
           height={28}
           style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }}
@@ -84,7 +69,7 @@ export function AuthorChip({
             letterSpacing: "0.04em",
           }}
         >
-          {initialsOf(name)}
+          {authorInitials(name)}
         </span>
       )}
       <span
@@ -98,15 +83,6 @@ export function AuthorChip({
       </span>
     </span>
   );
-}
-
-export function formatPostDate(publishedAt: string | null, lang: "de" | "en"): string {
-  if (!publishedAt) return "";
-  return new Date(publishedAt).toLocaleDateString(lang === "de" ? "de-DE" : "en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 }
 
 /** "~7 Min. · 6 Seiten" with a small book glyph; nothing without a length. */

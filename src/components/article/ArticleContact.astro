@@ -1,0 +1,30 @@
+---
+import type { ArticleLabels } from "./labels";
+
+/** The contact panel at the end of the article, pointing at the landingpage's form. */
+interface Props {
+  href: string;
+  labels: ArticleLabels;
+}
+
+const { href, labels } = Astro.props;
+---
+
+<aside
+  class="focus-hide jnl-panel jnl-tone-accent flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+  aria-label={labels.contactHead}
+>
+  <div>
+    <p class="eyebrow mb-1.5">{labels.contactHead}</p>
+    <p class="text-sm text-[var(--color-muted)]" style="max-width: 44ch; text-wrap: pretty;">
+      {labels.contactLead}
+    </p>
+  </div>
+  <a href={href} class="btn-flat shrink-0" data-track="article-contact">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="2" y="4" width="20" height="16"></rect>
+      <path d="m22 6-10 7L2 6"></path>
+    </svg>
+    <span>{labels.contactCta}</span>
+  </a>
+</aside>

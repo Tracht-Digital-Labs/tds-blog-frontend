@@ -1,0 +1,38 @@
+---
+import AuthorAvatar from "./AuthorAvatar.astro";
+import type { ArticleLabels } from "./labels";
+
+/**
+ * The author panel. A post without an author (deleted user, legacy content)
+ * shows the studio byline with the owner's role and the studio bio.
+ */
+interface Props {
+  author: { name: string; href: string | null; avatarUrl: string | null; bio: string };
+  /** True when the byline is the studio fallback rather than a real author. */
+  fallback: boolean;
+  lang: "de" | "en";
+  labels: ArticleLabels;
+}
+
+const { author, fallback, lang, labels } = Astro.props;
+---
+
+<aside class="focus-hide jnl-panel jnl-tone-tint grid grid-cols-[64px_1fr] gap-5 items-start">
+  <AuthorAvatar name={author.name} avatarUrl={author.avatarUrl} lang={lang} size="bio" />
+  <div>
+    <p class="eyebrow mb-2">{labels.aboutAuthor}</p>
+    <p class="font-semibold">
+      {author.href ? (
+        <a href={author.href} class="link-underline">{author.name}</a>
+      ) : (
+        author.name
+      )}
+      {fallback && (
+        <span class="font-normal text-sm text-[var(--color-muted)]">· {labels.owner}</span>
+      )}
+    </p>
+    <p class="text-sm leading-relaxed text-[var(--color-muted)] mt-2" style="text-wrap: pretty;">
+      {author.bio}
+    </p>
+  </div>
+</aside>

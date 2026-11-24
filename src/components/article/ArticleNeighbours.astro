@@ -1,0 +1,37 @@
+---
+import type { ArticleLabels } from "./labels";
+
+/** The next newer and next older article; nothing when there is neither. */
+interface Props {
+  newer: { slug: string; title: string } | null;
+  older: { slug: string; title: string } | null;
+  /** Prefix for in-blog links: "" for German, "/en" for English. */
+  pfx: string;
+  labels: ArticleLabels;
+}
+
+const { newer, older, pfx, labels } = Astro.props;
+---
+
+{(newer || older) && (
+  <nav class="focus-hide jnl-panel jnl-tone-tint grid sm:grid-cols-2 gap-px" aria-label={labels.nav}>
+    {newer ? (
+      <a href={`${pfx}/${newer.slug}`} class="jnl-tile block px-5 py-4 group">
+        <p class="eyebrow mb-2">← {labels.newer}</p>
+        <p class="display-tight text-lg group-hover:text-[var(--color-primary)] transition-colors">
+          {newer.title}
+        </p>
+      </a>
+    ) : (
+      <span class="hidden sm:block" aria-hidden="true"></span>
+    )}
+    {older && (
+      <a href={`${pfx}/${older.slug}`} class="jnl-tile block px-5 py-4 group sm:text-right">
+        <p class="eyebrow mb-2">{labels.older} →</p>
+        <p class="display-tight text-lg group-hover:text-[var(--color-primary)] transition-colors">
+          {older.title}
+        </p>
+      </a>
+    )}
+  </nav>
+)}

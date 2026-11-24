@@ -1,0 +1,27 @@
+---
+/**
+ * One collapsible level-2 section of the article body. The heading is the
+ * toggle; `lib/articleNav.ts` folds the body and the contents rail links to the
+ * heading's id. Both body formats render their content into the slot.
+ */
+interface Props {
+  id: string;
+  heading: string;
+}
+
+const { id, heading } = Astro.props;
+---
+
+<section class="article-sec">
+  <h2 id={id}>
+    <button class="sec-head" aria-expanded="true" aria-controls={`${id}-body`}>
+      <span>{heading}</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+    </button>
+  </h2>
+  <div class="sec-body" id={`${id}-body`}>
+    <div class="sec-body-inner">
+      <slot />
+    </div>
+  </div>
+</section>

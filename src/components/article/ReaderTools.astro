@@ -1,0 +1,50 @@
+---
+import type { ArticleLabels } from "./labels";
+
+/**
+ * The floating reading tools: zoom, focus mode, print. A zero-height sticky
+ * anchor: on lg+ the bar hangs in the left margin of the text and travels with
+ * it until the article ends; below lg it is a small fixed cluster bottom-right.
+ * Faint until hovered or focused, so it never competes with the text.
+ * `lib/readerTools.ts` wires the buttons.
+ */
+interface Props {
+  printHref: string;
+  labels: ArticleLabels;
+}
+
+const { printHref, labels } = Astro.props;
+---
+
+<div class="reader-tools-anchor">
+  <div class="reader-tools" role="toolbar" aria-label={labels.tools} aria-orientation="vertical">
+    <button type="button" class="reader-tool" id="zoom-in" aria-label={labels.zoomIn} title={labels.zoomIn}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path><path d="M11 8v6"></path><path d="M8 11h6"></path>
+      </svg>
+    </button>
+    <button type="button" class="reader-tool" id="zoom-out" aria-label={labels.zoomOut} title={labels.zoomOut}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path><path d="M8 11h6"></path>
+      </svg>
+    </button>
+    {/* Focus mode hides all chrome for distraction-free reading. Toggled here
+        or with the `f` key; the state persists per reader. */}
+    <button type="button" class="reader-tool" id="focus-toggle" aria-pressed="false" aria-label={labels.focus} title={labels.focusTitle}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+        <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+        <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+        <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+      </svg>
+    </button>
+    {/* Opens the colourless print / PDF view in its own tab. */}
+    <a href={printHref} target="_blank" rel="noopener" class="reader-tool" aria-label={labels.print} title={labels.print}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 9V2h12v7"></path>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <path d="M6 14h12v8H6z"></path>
+      </svg>
+    </a>
+  </div>
+</div>
