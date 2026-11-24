@@ -121,20 +121,15 @@
   font-weight: 500;
   color: var(--color-muted);
   text-decoration: none;
-  /* Flat: a left accent bar via inset box-shadow (no fill, no layout shift)
-     to match the angular kit, instead of the old soft-tint background. */
-  box-shadow: inset 2px 0 0 transparent;
-  transition: color 180ms ease, box-shadow 180ms ease;
+  transition: color 180ms ease;
 }
 .blog-sidebar a.snav-item:hover,
 .blog-sidebar a.snav-item:focus-visible {
   color: var(--color-ink);
-  box-shadow: inset 2px 0 0 var(--color-line);
 }
 .blog-sidebar a.snav-item[aria-current="page"] {
   color: var(--color-primary);
   font-weight: 600;
-  box-shadow: inset 2px 0 0 var(--color-accent);
 }
 .blog-sidebar .tds-lang-toggle { display: flex; width: 100%; background: var(--jnl-tile); }
 .blog-sidebar .tds-lang-toggle a { flex: 1; justify-content: center; height: 1.875rem; }

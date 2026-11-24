@@ -420,7 +420,6 @@
 .prose-print ul, .prose-print ol { padding-left: 1.4rem; }
 .prose-print li { margin-top: 0.35rem; }
 .prose-print blockquote {
-  border-left: 3px solid #d4d4d8;
   padding-left: 1rem;
   color: #3f3f46;
   font-style: italic;

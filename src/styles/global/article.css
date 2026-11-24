@@ -79,7 +79,6 @@
   height: 100%;
   padding: 1.25rem 1.375rem;
   background: var(--jnl-tile);
-  border-left: 2px solid var(--color-accent);
   text-decoration: none;
   color: inherit;
   transition: background-color 180ms ease;

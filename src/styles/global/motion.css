@@ -1,34 +1,16 @@
 /* === Motion & interactivity (flat-safe) ============================
    Keep the kit angular: no radii, no BLURRED shadows (the fixed hard 2D
    offset at the end of this file is the one shadow). Interactivity is
-   expressed through accent bars/underlines, colour shifts and small
-   translates only. Everything here collapses under reduced-motion. */
+   expressed through underlines, colour shifts and small translates only;
+   never a stripe on a box's left edge. Everything here collapses under
+   reduced-motion. */
 
 
-/* Flat hover lift for post cards — a growing accent left-bar plus a
-   1px rise. No shadow; the bar is the affordance. */
+/* Post cards answer hover with their tile colour and the hard-shadow lift
+   (listing.css, shadows.css). */
 .post-card {
   position: relative;
-  /* Colour only. The card used to rise 1px on hover; the growing accent bar
-     below already says "interactive", so the movement was decoration on top
-     of a working affordance. */
   transition: background-color 180ms ease;
-}
-.post-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--color-accent);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 200ms ease;
-}
-.post-card:hover::before,
-.post-card:focus-within::before {
-  transform: scaleY(1);
 }
 
 /* Card meta row — small flat glyph + label pairs (date / category). */
@@ -207,8 +189,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .post-card,
-  .post-card::before {
+  .post-card {
     transition: none;
   }
   .hero-track {
