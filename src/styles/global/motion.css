@@ -189,8 +189,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .post-card,
-  .post-card::before {
+  .post-card {
     transition: none;
   }
   .hero-track {
