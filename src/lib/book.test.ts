@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { bookClass, bookLabel, bookLevel, bookPages } from "./book";
+import { readStylesheet } from "../__tests__/stylesheet";
 
 describe("books", () => {
   it("grows the page block with the reading time", () => {
@@ -21,7 +20,7 @@ describe("books", () => {
   });
 
   it("has a CSS thickness for every level", () => {
-    const css = readFileSync(join(process.cwd(), "src", "styles", "global.css"), "utf8");
+    const css = readStylesheet("global");
     for (const level of [1, 2, 3, 4, 5]) expect(css).toContain(`.book--${level}`);
   });
 });

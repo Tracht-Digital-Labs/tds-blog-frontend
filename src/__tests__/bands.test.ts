@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readStylesheet } from "./stylesheet";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -30,7 +31,7 @@ function walk(dir: string, out: string[] = []): string[] {
 const stripComments = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 
-const css = stripComments(readFileSync(join(SRC, "styles", "global.css"), "utf8"));
+const css = stripComments(readStylesheet("global"));
 const markup = walk(SRC).filter((f) => /\.(astro|tsx)$/.test(f) && !/\.test\.tsx$/.test(f));
 const PAGES = join(SRC, "pages");
 
@@ -101,9 +102,11 @@ describe("no margin between blocks", () => {
 
 describe("almost no white", () => {
   it("fills no island button with white", () => {
-    for (const name of ["HeroSlider.tsx", "NewsletterSignup.tsx"]) {
-      const src = readFileSync(join(SRC, "components", "islands", name), "utf8");
-      expect(src, name).not.toMatch(/background:\s*"#fff(fff)?"/);
+    const islands = markup.filter((f) => f.includes(join("components", "islands")));
+    // The hero's CTA (islands/hero/) is the one that used to be white.
+    expect(islands.some((f) => f.endsWith("HeroSlide.tsx"))).toBe(true);
+    for (const file of islands) {
+      expect(readFileSync(file, "utf8"), file).not.toMatch(/background:\s*"#fff(fff)?"/);
     }
   });
 

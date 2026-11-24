@@ -1,0 +1,132 @@
+/* The logomark, the top nav and the angular buttons and chips. */
+
+/* ---- Brand logomark ----
+   The rule itself now lives in primitives.css; only the ASSET URL is
+   app-local, because tds-shared cannot serve a `public/`-rooted path.
+
+   The local copy that stood here declared `width: calc(1.4em * 0.885)` — a
+   PORTRAIT box for a LANDSCAPE asset (713x483 => 1.476). The mask is
+   `contain`-fitted, so the art fitted by width and rendered about 0.84em tall
+   inside a 1.4em box: the mark has been drawing undersized, letterboxed and
+   vertically off-centre against the wordmark, with nothing anywhere to say so.
+   The shared rule's default ratio is the real aspect of this exact file.
+
+   It also authored `mask` and `-webkit-mask` by hand. lightningcss collapses a
+   hand-written prefix pair down to the `-webkit-` form and drops the standard
+   property, which leaves Firefox with no mask at all — a solid navy rectangle
+   where the mark should be. The shared rule authors the unprefixed property
+   only and lets the build add the prefix. */
+:root {
+  --tds-brand-logo-mask: url("/brand/td-logomark.webp");
+}
+
+/* ---- Top nav ----
+   The bar, the divider square and the nav links are tds-shared's
+   `.tds-sitebar*` now, shared with the tools site and the shop.
+   What stays below is the journal's own: the search field and the Entdecken
+   disclosure. */
+
+/* No `display` here, deliberately — the header supplies it with
+   `hidden lg:flex`. This file is unlayered while Tailwind's utilities live in
+   `@layer utilities`, so an own `display: flex` beats `.hidden` outright and
+   the search field rendered at EVERY width. It cost 168px in a 375px bar,
+   which is what finally pushed the hamburger off the right edge once the
+   account menu joined the row; before that it merely sat there, wrong and
+   unnoticed, because nothing overflowed and `body { overflow-x: hidden }`
+   would have clipped it if it had. Same rule as `.panel-topbar` in tds-shared:
+   a class that a utility must be able to hide does not declare its own
+   display. */
+.nav-search {
+  position: relative;
+  align-items: center;
+  color: var(--color-muted);
+}
+.nav-search svg {
+  position: absolute;
+  left: 0.75rem;
+  pointer-events: none;
+}
+.nav-search input {
+  height: 2.25rem;
+  width: 10.5rem;
+  padding: 0 0.75rem 0 2.125rem;
+  border: 0;
+  background: var(--jnl-tile);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  transition: width 180ms ease, background-color 180ms ease;
+}
+.nav-search input::placeholder { color: var(--color-muted); }
+.nav-search input:hover { background: var(--jnl-tile-hover); }
+.nav-search input:focus {
+  /* No `outline: none` here: tds-shared (0.49.5) hides the ring of every
+     focused field itself, and in the same rule draws the coloured well that
+     replaces it as the indicator. Width and background stay supplementary. */
+  background: var(--jnl-tile-hover);
+}
+/* The field grows on focus only where the row has room for it. The shared
+   property bar holds five nav entries here; at 1024px, signed in, the extra
+   3.5rem pushed the row past its edge by a few pixels (measured headless). */
+@media (min-width: 80rem) {
+  .nav-search input:focus {
+    width: 14rem;
+  }
+}
+.nav-search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+/* The DE|EN switch lives in tds-shared (`.tds-lang-toggle`, 0.25.3). It used
+   to be defined here and nowhere else, so the tools site — the blog's sibling
+   public property — shipped a plain text link instead of a switch. Only the
+   sidebar's full-width variant stays local, below. */
+
+/* ---- Angular buttons / chips ---- */
+.btn-flat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 1.25rem;
+  border: 0;
+  cursor: pointer;
+  background: var(--color-surface-navy);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 180ms ease;
+}
+.btn-flat:hover {
+  background: color-mix(in srgb, var(--color-surface-navy) 85%, black);
+}
+.btn-flat:active {
+  background: color-mix(in srgb, var(--color-surface-navy) 70%, black);
+}
+
+.chip-flat {
+  display: inline-flex;
+  align-items: center;
+  height: 2rem;
+  padding: 0 0.875rem;
+  border: 0;
+  cursor: pointer;
+  background: var(--jnl-tile);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+.chip-flat:hover { background: var(--jnl-tile-hover); }
+.chip-flat.on {
+  background: var(--color-surface-navy);
+  color: #fff;
+}
+/* Compact chip for the Entdecken dropdown / sidebar tag rows. */
+.chip-flat--sm {
+  height: 1.625rem;
+  padding: 0 0.5625rem;
+  font-size: 0.75rem;
+}

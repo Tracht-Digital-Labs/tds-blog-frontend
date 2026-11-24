@@ -1,0 +1,15 @@
+/* ---- Phone: the logo sits IN the first band (2026-10-06) ----
+   On a phone there is no top bar (tds-shared app-shell): the header is the
+   page's first line. When the page opens on the dark hero (`.hero-stage`, the index pages), that
+   line takes the hero's navy so the logo stands inside the band rather than
+   on a strip of paper above it — the mark and the wordmark turn light. */
+@media (max-width: 63.99rem) {
+  .tds-app body:has(.hero-stage) .tds-app-header {
+    background: var(--color-surface-navy);
+    color: #fff;
+  }
+  .tds-app body:has(.hero-stage) .tds-app-header .brand-logo { background-color: #fff; }
+  .tds-app body:has(.hero-stage) .tds-app-header .brand-wordmark,
+  .tds-app body:has(.hero-stage) .tds-app-header .brand-wordmark .accent-italic { color: #fff; }
+  .tds-app body:has(.hero-stage) .tds-app-header .brand-wordmark .accent-italic { color: var(--color-accent-pink, #ff8fab); }
+}

@@ -2,7 +2,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { necessaryOnly } from "@tracht-digital-labs/tds-shared/consent";
 import { writeConsent } from "@tracht-digital-labs/tds-shared/consent/store";
-import { bumpInterests, readInterests, trackInterests as track } from "./interests";
+import { trackInterests as track } from "./interests";
+import { bumpInterests, readInterests } from "./interestWeights";
 
 const cookie = () => readInterests(document.cookie);
 // Every call subscribes to consent changes; unsubscribe after each test, or a
@@ -54,5 +55,14 @@ describe("bumpInterests", () => {
     expect(next.seo).toBe(50);
     expect(Object.keys(next)).toHaveLength(12);
     expect(next.t0).toBeUndefined();
+  });
+});
+
+describe("readInterests", () => {
+  it("keeps numeric weights only and reads anything malformed as no profile", () => {
+    const encoded = encodeURIComponent(JSON.stringify({ webshop: 3, recht: "9", seo: null }));
+    expect(readInterests(`a=1; tds-interests=${encoded}`)).toEqual({ webshop: 3 });
+    expect(readInterests("tds-interests=%7Bkaputt")).toEqual({});
+    expect(readInterests("other=1")).toEqual({});
   });
 });

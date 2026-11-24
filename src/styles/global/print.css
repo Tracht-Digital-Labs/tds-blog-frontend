@@ -1,0 +1,471 @@
+/* ---- Article: print / PDF view (/[slug]/print) ----
+   A colourless, chrome-free rendering opened in its own tab. The screen shows
+   a sticky control panel (PrintControls island) whose switches toggle
+   `hide-<key>` classes on #print-root; `@media print` drops the panel so only
+   the curated document reaches the printer / "Save as PDF". Colours are
+   hard-coded neutral (not theme tokens) so the sheet never inverts in dark
+   mode. */
+@page { margin: 16mm; } /* Seitenabstand default; the island overrides with size + margin */
+.print-shell {
+  padding: 0 1rem 3rem;
+}
+@media (min-width: 900px) {
+  /* Leave room for the floating control bar pinned to the right. */
+  .print-shell { padding: 1.5rem 19rem 4rem 1.5rem; }
+}
+/* The sheets' stage: the island measures its width to scale them. It scrolls
+   sideways when the sheet is wider than the screen (the 100 % view on a
+   phone). The sheet's hard offset (8px) needs room or it is cut off. */
+.print-stage {
+  overflow-x: auto;
+  padding: 0 8px 8px 0;
+  overscroll-behavior-x: contain;
+}
+/* Meta / format controls — a floating panel on the right on a wide screen; a
+   sticky bar over the sheet on a phone, whose settings fold out under it
+   (2026-10-07: the whole panel used to fill the phone's first screen, and the
+   sheet only started below it). The kit's hard 2D shadow on screen only;
+   @media print drops every shadow. */
+.print-controls {
+  background: #fff;
+  border: 1px solid #18181b;
+  box-shadow: 6px 6px 0 0 #18181b;
+}
+@media (max-width: 899.98px) {
+  .print-controls {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    margin: 0 -1rem 1.25rem;
+    border-width: 0 0 1px;
+    box-shadow: 0 4px 0 0 #18181b;
+    padding: max(0.6rem, env(safe-area-inset-top)) 1rem 0.6rem;
+  }
+  .print-settings {
+    display: none;
+    max-height: calc(100dvh - 5.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1rem 0 0.4rem;
+  }
+  .print-controls-inner.is-open .print-settings { display: flex; }
+}
+@media (min-width: 900px) {
+  .print-controls {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 15rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding: 1rem;
+    z-index: 10;
+  }
+}
+.print-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+@media (min-width: 900px) {
+  .print-bar { flex-direction: column; align-items: stretch; gap: 0.7rem; }
+}
+.print-settings { flex-direction: column; gap: 0.8rem; }
+@media (min-width: 900px) {
+  .print-settings { display: flex; margin-top: 0.8rem; }
+}
+.print-more {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: #18181b;
+  background: #f4f4f5;
+  border: 1px solid #18181b;
+  box-shadow: 2px 2px 0 0 #18181b;
+}
+.print-more[aria-expanded="true"] { background: #18181b; color: #fff; box-shadow: none; translate: 2px 2px; }
+@media (min-width: 900px) {
+  .print-more { display: none; }
+}
+.print-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+/* Paper and type size side by side. */
+.print-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+@media (min-width: 900px) {
+  .print-row { grid-template-columns: 1fr; }
+}
+.print-scale-note {
+  margin: -0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #71717a;
+}
+.print-mark-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e4e4e7;
+}
+.print-mark-row .print-action { width: auto; flex: 1 1 auto; }
+.print-mark-hint { flex: 1 1 100%; margin: 0; font-size: 0.75rem; color: #52525b; }
+/* Marker mode marks on MOUSE release; a touch screen uses the selection bar. */
+@media (hover: none), (pointer: coarse) {
+  .print-mark-mode { display: none; }
+}
+.print-seg { display: flex; gap: 0.25rem; }
+.print-seg-btn {
+  flex: 1;
+  padding: 0.4rem 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #52525b;
+  background: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.print-seg-btn:hover { background: #e4e4e7; }
+.print-seg-btn.on { background: #18181b; color: #fff; border-color: #18181b; }
+.print-seg-btn,
+.print-action { box-shadow: 2px 2px 0 0 #18181b; }
+.print-seg-btn.on,
+.print-seg-btn:active,
+.print-action:active { box-shadow: none; translate: 2px 2px; }
+
+/* Highlighter toggle + clear. */
+.print-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #27272a;
+  background: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+.print-action:hover { background: #e4e4e7; }
+.print-action.on { background: #fef08a; border-color: #eab308; color: #111; }
+.print-clear {
+  padding: 0.1rem 0;
+  font-size: 0.75rem;
+  color: #71717a;
+  background: none;
+  border: 0;
+  text-align: left;
+}
+.print-clear:hover { color: #111; text-decoration: underline; }
+.print-clear:disabled { opacity: 0.5; cursor: default; text-decoration: none; }
+.print-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  color: #52525b;
+  text-decoration: none;
+}
+@media (max-width: 899.98px) {
+  .print-back-link {
+    flex: none;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #18181b;
+  }
+  .print-back-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .print-do { flex: 1 1 auto; min-height: 2.75rem; }
+}
+.print-back-link:hover { color: #111; text-decoration: underline; }
+.print-controls-inner { display: flex; flex-direction: column; }
+.print-controls-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #71717a;
+  margin: 0;
+}
+/* The switches in two columns, in document order — eight toggles in one
+   long column was the "unordered" list. */
+.print-switches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 0.75rem;
+}
+/* The fixed side panel on a wide screen is one narrow column: one switch a row. */
+@media (min-width: 900px) {
+  .print-switches { grid-template-columns: 1fr; }
+}
+.print-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: #27272a;
+}
+.print-switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  opacity: 0;
+}
+.print-switch-track {
+  flex: none;
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: #d4d4d8;
+  /* The track is a groove the thumb runs in: pressed in, like every control. */
+  box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.16);
+  transition: background-color 160ms ease;
+}
+.print-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 160ms ease;
+}
+.print-switch-input:checked + .print-switch-track {
+  background: #18181b;
+  box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.5);
+}
+.print-switch-input:checked + .print-switch-track .print-switch-thumb { transform: translateX(14px); }
+.print-switch-input:focus-visible + .print-switch-track { outline: 2px solid #18181b; outline-offset: 2px; }
+.print-do { justify-content: center; }
+@media (min-width: 900px) {
+  .print-do { width: 100%; }
+}
+
+/* The selection bar: what to do with the text the reader just selected, or the
+   highlight just tapped. Fixed low and centred — a phone draws its own
+   copy/share menu ABOVE a selection, so the two never collide — and above the
+   home indicator. */
+.print-selbar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  translate: -50% 0;
+  z-index: 30;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  background: #18181b;
+  box-shadow: 4px 4px 0 0 #a1a1aa;
+}
+.print-selbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #fff;
+  background: transparent;
+  border: 1px solid #52525b;
+}
+.print-selbar-btn.is-mark { background: #fef08a; border-color: #eab308; color: #111; }
+
+/* The sheet — a real page-sized surface (Seitenabstand via padding), flat
+   border, centred in the remaining space. Widths match the paper; the island
+   swaps the size-* class and the @page rule together. */
+/* The sheet. `#print-root` is the stage of PAGES (printPaginate.ts): each
+   `.print-page` is one sheet of the chosen paper at its exact size, with the
+   16mm margin as padding, a gap between sheets and the kit's hard offset
+   under each. Until the island has paginated, the root itself looks like one
+   sheet so nothing flashes. The whole stage keeps the paper width in mm and is
+   scaled to the screen with `zoom` (--print-scale, PrintControls). */
+.print-doc {
+  color: #111;
+  font-family: var(--font-body);
+  box-sizing: border-box;
+  margin-inline: auto;
+  --print-fs: 1rem; /* body prose size, driven by the fs-* class below */
+  --page-h: 297mm;
+  zoom: var(--print-scale, 1);
+}
+.print-doc.size-a5 { width: 148mm; --page-h: 210mm; }
+.print-doc.size-a4 { width: 210mm; --page-h: 297mm; }
+.print-doc.size-a3 { width: 297mm; --page-h: 420mm; }
+.print-doc:not(.is-paged),
+.print-page {
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #18181b;
+  padding: 16mm;
+  box-shadow: 8px 8px 0 0 #18181b;
+}
+.print-doc:not(.is-paged) { min-height: var(--page-h); }
+.print-page {
+  position: relative;
+  width: 100%;
+  height: var(--page-h);
+  margin-bottom: 12mm;
+}
+.print-page:last-child { margin-bottom: 0; }
+.print-page__inner {
+  height: 100%;
+  overflow: hidden;
+}
+/* A single block taller than a page (a huge image) keeps its page and may
+   not be cut: it is the only thing on it. */
+.print-page__inner:has(> :only-child) { overflow: visible; }
+/* Where the printer puts it: the @page bottom-right margin box (PrintControls)
+   is the 16mm bottom margin, right-aligned to the text and centred in height. */
+.print-page__no {
+  position: absolute;
+  right: 16mm;
+  bottom: 8mm;
+  translate: 0 50%;
+  line-height: 1;
+  font-size: 0.6875rem;
+  color: #71717a;
+  font-variant-numeric: tabular-nums;
+}
+.print-doc.fs-s { --print-fs: 0.9rem; }
+.print-doc.fs-m { --print-fs: 1rem; }
+.print-doc.fs-l { --print-fs: 1.15rem; }
+
+/* Highlighter: marks made in the preview print with the page (force the
+   background so it survives print without the reader enabling backgrounds). */
+.print-mark {
+  background: #fef08a;
+  color: inherit;
+  padding: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+#print-root.marking { cursor: text; }
+#print-root mark.print-mark { cursor: pointer; }
+.print-doc .print-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #52525b;
+  margin: 0 0 0.6rem;
+}
+/* A fixed size, never a viewport unit: `4vw` measured the SCREEN in the
+   preview and the paper in print, so the title wrapped — and the pages broke —
+   differently on paper than in the preview. */
+.print-title {
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  line-height: 1.15;
+  margin: 0 0 0.75rem;
+  text-wrap: balance;
+}
+.print-lead { font-size: 1.05rem; line-height: 1.6; color: #3f3f46; margin: 0 0 1rem; }
+.print-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  font-size: 0.8125rem;
+  color: #52525b;
+  margin: 0 0 0.4rem;
+}
+.print-meta > span { position: relative; }
+.print-meta > span + span::before {
+  content: "·";
+  position: absolute;
+  left: -0.55rem;
+  color: #a1a1aa;
+}
+.print-url { font-size: 0.75rem; color: #71717a; word-break: break-all; margin: 0 0 1.5rem; }
+.pm-cover { display: block; width: 100%; height: auto; margin: 0 0 1.5rem; filter: grayscale(1); }
+
+/* Meta visibility toggles, driven by the island via #print-root classes. */
+#print-root.hide-cover .pm-cover,
+#print-root.hide-category .pm-category,
+#print-root.hide-date .pm-date,
+#print-root.hide-reading .pm-reading,
+#print-root.hide-author .pm-author,
+#print-root.hide-lead .pm-lead,
+#print-root.hide-tags .pm-tags,
+#print-root.hide-url .pm-url { display: none; }
+#print-root.hide-date.hide-reading.hide-author .print-meta { display: none; }
+
+.print-tags { font-size: 0.8125rem; color: #52525b; margin: 2rem 0 0; }
+
+.prose-print { color: #111; font-size: var(--print-fs, 1rem); line-height: 1.7; }
+.prose-print > * + * { margin-top: 1rem; }
+.prose-print h2 { font-family: var(--font-display); font-size: 1.4rem; line-height: 1.25; margin-top: 2rem; }
+.prose-print h3 { font-size: 1.15rem; font-weight: 700; margin-top: 1.5rem; }
+.prose-print a { color: #111; text-decoration: underline; }
+.prose-print ul, .prose-print ol { padding-left: 1.4rem; }
+.prose-print li { margin-top: 0.35rem; }
+.prose-print blockquote {
+  border-left: 3px solid #d4d4d8;
+  padding-left: 1rem;
+  color: #3f3f46;
+  font-style: italic;
+}
+.prose-print img { max-width: 100%; height: auto; }
+.prose-print pre {
+  background: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+}
+.prose-print code { font-family: var(--font-mono); font-size: 0.9em; }
+.prose-print hr { border: 0; border-top: 1px solid #e4e4e7; }
+
+@media print {
+  .print-controls,
+  .print-selbar { display: none !important; }
+  .print-shell { max-width: none; margin: 0; padding: 0; }
+  .print-stage { overflow: visible; padding: 0; }
+  .print-doc { zoom: 1 !important; min-height: 0 !important; width: auto !important; }
+  /* Paper: the page boxes dissolve into the printer's own pages — same
+     content box (@page size + 16mm margin), and a forced break where the
+     preview broke, so the printout matches the preview page for page. */
+  .print-page {
+    height: auto;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+  .print-page + .print-page { break-before: page; }
+  .print-page__inner { height: auto; overflow: visible; }
+  .print-page__no { display: none; }
+  /* Let @page own the sheet size + margin — drop the on-screen sheet frame
+     so the paper margin isn't applied twice. */
+  .print-doc {
+    width: auto !important;
+    max-width: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .print-title, .prose-print h2, .prose-print h3 { break-after: avoid; }
+  .prose-print p, .prose-print blockquote, .prose-print li { orphans: 3; widows: 3; }
+  .prose-print pre, .prose-print img, .prose-print blockquote { break-inside: avoid; }
+  a { color: #000 !important; }
+}

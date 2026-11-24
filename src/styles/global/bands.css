@@ -1,0 +1,173 @@
+/* === Farbbänder statt Abstände (2026-09-15) ==========================
+   The journal no longer sets coloured blocks on a white ground with gaps
+   between them. Every section is a full-bleed band in one of five tones,
+   bands sit flush against each other, and the blocks inside a band (cards,
+   rows, panels) take the band's counter-tone and meet at a 1px seam. Space is
+   padding inside a block, never margin between two.
+
+   Blog-only on purpose: surfaces/blog.css is also rendered by the tools site
+   and the shop, which keep their light ground.
+
+   Three measurements decided the tokens (WCAG, light / dark theme):
+   - --color-muted (#6b6b66) on the tint is 4.26:1, below AA. The body
+     therefore takes --jnl-muted (ink 72% into soft): ~5.8:1 on the tint,
+     6.0:1 on soft.
+   - The coral on bordeaux is 4.18 / 3.72:1, so in the accent tone links are
+     white and underlined, and secondary text is white at 0.8 (0.72 would be
+     4.15:1 on the dark theme's lifted bordeaux).
+   - 9% primary is indistinguishable from soft in the dark theme (1.02:1), so
+     the dark tint takes 20%.
+
+   The seam is a 1px gap, never a parent filled with --color-line: an
+   auto-fill grid leaves empty tracks in its last row, and those must show the
+   band, not a grey block. */
+:root {
+  --jnl-band-pad: clamp(2.5rem, 1.9rem + 2.4vw, 4.5rem);
+  --jnl-panel-pad: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  --jnl-tint: color-mix(in srgb, var(--color-primary) 9%, var(--color-paper));
+  --jnl-muted: color-mix(in srgb, var(--color-ink) 72%, var(--color-soft));
+  /* Outside a tone a tile is soft. A container that changes --jnl-tile must
+     re-declare --jnl-tile-hover as well: a custom property computes where it
+     is declared, not where it is read. */
+  --jnl-tile: var(--color-soft);
+  --jnl-tile-hover: color-mix(in srgb, var(--color-soft) 92%, var(--color-ink));
+}
+:root[data-theme="dark"] {
+  --jnl-tint: color-mix(in srgb, var(--color-primary) 20%, var(--color-paper));
+}
+/* The same tokens for a themed SUBTREE — the theme toggle's hover preview
+   clones the page and marks the clone with the other theme. Declared on
+   <html>, the mixes above resolve against the page's palette and reach the
+   clone as literals, so the dark circle showed the light tint on the language
+   switch, the search field and every tinted band. Restated here they resolve
+   against the clone's palette. Keep the values identical to the blocks above. */
+[data-theme]:not(:root) {
+  --jnl-tint: color-mix(in srgb, var(--color-primary) 9%, var(--color-paper));
+  --jnl-muted: color-mix(in srgb, var(--color-ink) 72%, var(--color-soft));
+  --jnl-tile: var(--color-soft);
+  --jnl-tile-hover: color-mix(in srgb, var(--color-soft) 92%, var(--color-ink));
+  --color-muted: var(--jnl-muted);
+}
+[data-theme="dark"]:not(:root) {
+  --jnl-tint: color-mix(in srgb, var(--color-primary) 20%, var(--color-paper));
+}
+
+/* The ground is never paper. The print sheet keeps its own white. */
+body {
+  background-color: var(--color-soft);
+  --color-muted: var(--jnl-muted);
+}
+/* The preview clone brings its own ground (paper in tds-shared); the
+   journal's ground is soft, so the circle takes that too. */
+.tds-theme-preview__page {
+  background-color: var(--color-soft);
+}
+@media print {
+  body {
+    background-color: #fff;
+  }
+}
+
+.jnl-band {
+  padding-block: var(--jnl-band-pad);
+}
+.jnl-panel {
+  padding: var(--jnl-panel-pad);
+}
+
+/* A vertical run of tiles. Tailwind's preflight already strips list margins
+   and markers, so this only sets the seam. */
+.jnl-stack {
+  display: grid;
+  gap: 1px;
+}
+/* The intrinsic grid as a mosaic. The pair selector only narrows the shared
+   class's gutter to the seam; it does not re-declare .tds-grid-auto. */
+.tds-grid-auto.jnl-mosaic {
+  gap: 1px;
+}
+/* The panels that end an article. The seam shows the page ground, which also
+   keeps two tint panels apart when the sand one between them renders nothing. */
+.jnl-article-end {
+  display: grid;
+  /* An implicit `auto` track grows to its widest item's min-content: a
+     product strip (three 14rem cards) widened every panel to ~744px on a
+     390px phone, and body's overflow clipped the rest unseen. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
+}
+
+/* A tile for content that has no component class of its own. */
+.jnl-tile {
+  background: var(--jnl-tile);
+  transition: background-color 180ms ease;
+}
+a.jnl-tile:hover,
+a.jnl-tile:focus-visible {
+  background: var(--jnl-tile-hover);
+}
+
+/* Light tones: sand and tint, each the other's tile. Shared cards
+   (ProductCard) read --color-card, so inside a band they become a tile
+   instead of a white card. */
+.jnl-tone-sand,
+.jnl-tone-tint {
+  color: var(--color-ink);
+}
+.jnl-tone-sand {
+  background-color: var(--color-soft);
+  --jnl-tile: var(--jnl-tint);
+  --jnl-tile-hover: color-mix(in srgb, var(--jnl-tint) 92%, var(--color-ink));
+  --color-card: var(--jnl-tint);
+}
+.jnl-tone-tint {
+  background-color: var(--jnl-tint);
+  --jnl-tile: var(--color-soft);
+  --jnl-tile-hover: color-mix(in srgb, var(--color-soft) 92%, var(--color-ink));
+  --color-card: var(--color-soft);
+}
+
+/* Dark tones re-map the page tokens the way the shared .tds-tone-navy does, so
+   anything shared inside reads on the dark ground. --color-primary is left
+   alone on purpose: the slug covers draw with it. */
+.jnl-tone-navy,
+.jnl-tone-ink,
+.jnl-tone-accent {
+  color: #fff;
+  --color-ink: #ffffff;
+  --color-black: #ffffff;
+  --color-muted: rgb(255 255 255 / 0.8);
+  --color-line: rgb(255 255 255 / 0.18);
+  --color-border: rgb(255 255 255 / 0.18);
+  --color-soft: rgb(255 255 255 / 0.08);
+  --color-card: rgb(255 255 255 / 0.08);
+  --color-accent: var(--color-accent-pink);
+  --tds-eyebrow-color: var(--color-accent-pink);
+  --jnl-tile: rgb(255 255 255 / 0.08);
+  --jnl-tile-hover: rgb(255 255 255 / 0.16);
+}
+.jnl-tone-navy {
+  background-color: var(--color-surface-navy);
+}
+.jnl-tone-ink {
+  background-color: var(--color-surface-ink);
+}
+/* The coral fails on bordeaux (4.18:1), so the accent itself turns white. */
+.jnl-tone-accent {
+  background-color: var(--color-surface-accent);
+  --color-accent: #ffffff;
+  --tds-eyebrow-color: #ffffff;
+}
+
+/* The header islands on soft instead of card. tds-shared reads the fill from
+   `--tds-sitebar-fill`; the journal sets only that, because the tools site and
+   the shop keep their light islands. Its search field and language switch
+   become tint tiles so they still read on it. */
+.brand-header {
+  --tds-sitebar-fill: var(--color-soft);
+  --jnl-tile: var(--jnl-tint);
+  --jnl-tile-hover: color-mix(in srgb, var(--jnl-tint) 92%, var(--color-ink));
+}
+.brand-header .tds-lang-toggle {
+  background: var(--jnl-tint);
+}

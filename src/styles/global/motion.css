@@ -1,0 +1,235 @@
+/* === Motion & interactivity (flat-safe) ============================
+   Keep the kit angular: no radii, no BLURRED shadows (the fixed hard 2D
+   offset at the end of this file is the one shadow). Interactivity is
+   expressed through accent bars/underlines, colour shifts and small
+   translates only. Everything here collapses under reduced-motion. */
+
+
+/* Flat hover lift for post cards — a growing accent left-bar plus a
+   1px rise. No shadow; the bar is the affordance. */
+.post-card {
+  position: relative;
+  /* Colour only. The card used to rise 1px on hover; the growing accent bar
+     below already says "interactive", so the movement was decoration on top
+     of a working affordance. */
+  transition: background-color 180ms ease;
+}
+.post-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 200ms ease;
+}
+.post-card:hover::before,
+.post-card:focus-within::before {
+  transform: scaleY(1);
+}
+
+/* Card meta row — small flat glyph + label pairs (date / category). */
+.card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.card-meta svg {
+  flex-shrink: 0;
+  color: var(--color-accent);
+  opacity: 0.8;
+}
+
+/* Inline accent glyph that precedes a section heading. */
+.head-ico {
+  flex-shrink: 0;
+  color: var(--color-accent);
+  vertical-align: -0.15em;
+}
+
+/* A read affordance that nudges its arrow on hover of the enclosing
+   card/link. */
+.read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Hero slider — a real carousel track. Every set is laid out side-by-side
+   in .hero-track; the component translates the track by -activeIndex*100%
+   (+ the live drag offset), so a set change slides the whole strip and a
+   drag reveals the neighbouring set rather than blank navy. */
+.hero-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.hero-track {
+  display: flex;
+  width: 100%;
+  cursor: grab;
+  touch-action: pan-y; /* let vertical scrolling through; we own the horizontal axis */
+}
+.hero-track.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.hero-track > .hero-slide {
+  flex: 0 0 100%; /* one viewport-width per set */
+  min-width: 0; /* let the inner grid shrink so overflow:hidden can clip */
+  /* Each set paints only inside its own slot. The cover sits at the slot's
+     right edge and its page block (book--5 + hover = 23px) spilled into the
+     NEXT set: with "Für dich" first, a white page edge ran down over the
+     start of the "Aktuelles" headline. */
+  overflow: clip;
+}
+@media (min-width: 640px) {
+  /* Room for the cover's page block inside the slot, so clipping the slot
+     never cuts the visible set's own book. */
+  .hero-track > .hero-slide {
+    padding-right: 24px;
+  }
+}
+/* Desktop: the header is a transparent strip with two islands, in flow above
+   the hero. Its 84px showed the soft page ground as a light bar above the
+   navy band. The band now starts under the header (pulled up by more than the
+   header is tall; anything above the page top is never painted) and pads its
+   content back down to where it was. */
+@media (min-width: 64rem) {
+  .hero-band {
+    margin-top: -7rem;
+    padding-top: 7rem;
+  }
+  /* The islands now open on navy, where their navy offset vanished. They take
+     the dark bands' black ink (as .hero-stage does) on this page. */
+  body:has(.hero-band) .brand-header {
+    --tds-shadow-ink: rgb(0 0 0 / 0.5);
+    --tds-shadow-hard-sm: 3px 3px 0 0 var(--tds-shadow-ink);
+  }
+}
+
+/* Slider controls — a centred bar of prev/next arrows flanking a dot rail,
+   sitting below the stage so nothing overlaps the slide content. The flat
+   (kantig) blog look: square, hairline-bordered glass chips, no radius. */
+.hero-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+.hero-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.hero-arrow:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+.hero-arrow:focus-visible {
+  outline: 2px solid var(--color-accent-pink);
+  outline-offset: 2px;
+}
+
+.hero-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.hero-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 0;
+  background: rgba(255, 255, 255, 0.3);
+  transition: width 200ms ease, background-color 200ms ease;
+}
+.hero-dot:hover { background: rgba(255, 255, 255, 0.55); }
+.hero-dot.on {
+  width: 26px;
+  background: var(--color-accent-pink);
+}
+.hero-dot:focus-visible {
+  outline: 2px solid var(--color-accent-pink);
+  outline-offset: 2px;
+}
+.hero-cover {
+  aspect-ratio: 4 / 3;
+}
+@media (min-width: 768px) {
+  .hero-stage {
+    /* The cap used to be 430px, which a 1080p screen already reached — so the
+       hero stayed exactly as tall at 2560px as at 1280px while the shell grew
+       to 1920px, and the band flattened into a letterbox. Growing the cap with
+       the WIDTH (not only the height) keeps the lead image in proportion to
+       the column it sits beside. */
+    min-height: clamp(360px, 34vh + 6vw, 560px);
+    /* A floor, not a fixed height. A fixed height squeezed the text column
+       whenever a title ran to three or four lines: the clamped excerpt shrank
+       first (cut mid-line), then the rest spilled past the stage. Now the
+       stage grows with the tallest set, so every set keeps the same height and
+       switching sets never jumps. */
+    align-items: stretch;
+  }
+  /* The slide is a grid so the hero grid inside stretches to the track
+     height (a stretched flex item's height, which is the stage's). */
+  .hero-stage .hero-track > .hero-slide {
+    display: grid;
+  }
+  /* The cover column stretches with the row; the cover itself has no
+     intrinsic height (an absolutely positioned drawing), so it takes exactly
+     what the text column leaves. */
+  .hero-stage .hero-grid {
+    grid-template-rows: auto;
+  }
+  /* Image fills the column height instead of scaling with the (now full-bleed)
+     width — that was making the cover huge and the hero tall. */
+  .hero-cover {
+    aspect-ratio: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-card,
+  .post-card::before {
+    transition: none;
+  }
+  .hero-track {
+    /* belt-and-braces: the component already drops the transition inline
+       for reduced-motion (prefersReducedMotion), this covers no-JS too */
+    transition: none;
+  }
+  .toc,
+  .toc-link,
+  .toc-label,
+  .toc-tick,
+  .article-shell.has-toc,
+  .with-sidebar,
+  .with-sidebar .article-shell,
+  .reader-tools,
+  .reader-tool,
+  .back-rail {
+    transition: none;
+  }
+  .print-switch-track,
+  .print-switch-thumb {
+    transition: none;
+  }
+}

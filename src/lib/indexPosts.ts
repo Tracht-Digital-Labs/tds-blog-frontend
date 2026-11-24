@@ -1,4 +1,4 @@
-import type { IndexPost } from "~/components/islands/BlogIndex";
+import type { IndexPost } from "./indexFilter";
 import type { listAllPosts } from "./content-api";
 
 type ListedPost = Awaited<ReturnType<typeof listAllPosts>>[number];

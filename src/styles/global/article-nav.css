@@ -1,0 +1,180 @@
+/* The article's section nav and table of contents. */
+
+/* ---- Article: section nav — fixed rail merged with the scrollbar ----
+   `position: fixed` against the viewport (no transformed ancestors —
+   the reading-progress bar relies on the same invariant). right: 14px
+   sits the rail just inside the 10px brand scrollbar channel. Hidden
+   below lg (the header back button + linear reading take over). */
+.toc { display: none; }
+@media (min-width: 1024px) {
+  .toc {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 30; /* below the blog sidebar (40) and progress bar (50) */
+    width: var(--toc-w);
+    max-height: min(72vh, 42rem);
+    background: var(--jnl-tint);
+    --jnl-tile: var(--color-soft);
+    --jnl-tile-hover: color-mix(in srgb, var(--color-soft) 92%, var(--color-ink));
+    padding: 0.875rem;
+    transition: opacity 200ms ease;
+  }
+  .toc .toc-list {
+    overflow-y: auto;
+    min-height: 0;
+  }
+  /* Faded out once the reader scrolls past the article column, so the
+     rail never floats over the navy site footer. */
+  .toc.rail-off {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .toc-collapsed .toc {
+    width: auto;
+    background: transparent;
+    padding: 0.25rem;
+  }
+  .toc-collapsed .toc .toc-list { overflow: visible; }
+}
+
+/* ---- Article: TOC rows (expanded panel) ---- */
+.toc a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  background: var(--jnl-tile);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+.toc a:hover { background: var(--jnl-tile-hover); color: var(--color-ink); }
+.toc a.on {
+  background: var(--color-surface-navy);
+  color: #fff;
+}
+
+/* Peek nav: in the expanded panel the section headings rest faint + small and
+   only rise to full opacity/size while the reader hovers (or tabs into) the
+   rail — the section currently in view (.on) always stays legible so the
+   reading position is visible. Scoped to the expanded panel; the collapsed
+   rail keeps its own in-view/hover label logic further down. */
+.article-shell:not(.toc-collapsed) .toc-link {
+  opacity: 0.5;
+  transition: opacity 180ms ease, color 180ms ease, background-color 180ms ease;
+}
+.article-shell:not(.toc-collapsed) .toc-label {
+  font-size: 0.6875rem;
+  transition: font-size 180ms ease;
+}
+.article-shell:not(.toc-collapsed) .toc:hover .toc-link,
+.article-shell:not(.toc-collapsed) .toc:focus-within .toc-link,
+.article-shell:not(.toc-collapsed) .toc-link.on {
+  opacity: 1;
+}
+.article-shell:not(.toc-collapsed) .toc:hover .toc-label,
+.article-shell:not(.toc-collapsed) .toc:focus-within .toc-label,
+.article-shell:not(.toc-collapsed) .toc-link.on .toc-label {
+  font-size: 0.8125rem;
+}
+
+/* ---- Article: TOC head + fold toggle ---- */
+.toc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+}
+.toc-head .toc-title { margin-bottom: 0; }
+.toc-toggle {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--jnl-tile);
+  color: var(--color-muted);
+  border: 0;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+.toc-toggle:hover { background: var(--jnl-tile-hover); color: var(--color-ink); }
+.toc-toggle svg { transition: transform 280ms ease; }
+.toc-list { list-style: none; margin: 0; padding: 0; }
+.toc-tick { display: none; }
+
+/* ---- Article: folded TOC — one tick line per section ----
+   The toggle chevron points toward the edge it acts on: expanded panel
+   collapses to the RIGHT (rotate 180 = chevron right), the folded rail
+   expands back out to the LEFT (base chevron). */
+.toc-collapsed .toc-head { justify-content: center; margin-bottom: 0.5rem; }
+.toc-collapsed .toc-title { display: none; }
+.toc .toc-toggle svg { transform: rotate(180deg); }
+.toc-collapsed .toc .toc-toggle svg { transform: none; }
+
+.toc-collapsed .toc-link,
+.toc-collapsed .toc-link:hover,
+.toc-collapsed .toc-link.on {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 9px 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+}
+.toc-collapsed .toc-tick {
+  display: block;
+  height: 2px;
+  width: 15px;
+  border-radius: 2px;
+  background: var(--color-line);
+  transition: width 200ms ease, background-color 200ms ease;
+}
+.toc-collapsed .toc-link:hover .toc-tick,
+.toc-collapsed .toc-link:focus-visible .toc-tick {
+  width: 20px;
+  background: var(--color-ink);
+}
+/* The section currently in view: its line expands + turns accent. */
+.toc-collapsed .toc-link.on .toc-tick {
+  width: 28px;
+  background: var(--color-accent);
+}
+/* Heading label rides the rail as a floating chip to its LEFT, and ONLY on
+   hover or keyboard focus of its tick. It used to show as well for every
+   heading on screen (an IntersectionObserver `.in-view`), which put chips
+   beside the text the whole time — exactly what folding the rail was meant to
+   stop. The section in view is marked by its wider accent tick alone. */
+.toc-collapsed .toc-label {
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%) translateX(4px);
+  max-width: 38ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--color-surface-navy);
+  color: #fff;
+  padding: 2px 8px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 5;
+}
+.toc-collapsed .toc-link:hover .toc-label,
+.toc-collapsed .toc-link:focus-visible .toc-label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}

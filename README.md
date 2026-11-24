@@ -212,7 +212,7 @@ src/
 │   └── rss.xml.ts                  # feed
 ├── public/                         # robots.txt, llms.txt, favicon
 ├── scripts/og-smoke.ts             # render two fixture OG images to disk
-├── styles/global.css               # flat design vocabulary + .prose-article
+├── styles/global.css               # shared imports + the partials under styles/global/
 └── types/
     └── shared-augment.d.ts         # tds-shared-pkg@0.1.0 patch: BlogPost.tags (tds-shared-pkg#8)
 ```

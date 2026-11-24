@@ -3,7 +3,7 @@
 ## Index (`src/pages/index.astro`, `src/pages/en/index.astro`)
 
 Featured-post hero (fixed navy), category sidebar with counters (collapsible), flat card grid and live full-text
-search, all in the `BlogIndex` island (posts as props, projected by `toIndexPost` to the fields the island reads, client-side filtering, `?q=` round-trips). The header's search
+search, all in the `BlogIndex` island (posts as props, projected by `toIndexPost` to the fields the island reads, client-side filtering, `?q=` round-trips). The filter rules (category, reading-time band, search, order) are `lib/indexFilter.ts`; the rail, the filter panel and the labels sit in `islands/index/`. The header's search
 field drives it via `tds-blog-search` events; elsewhere Enter navigates to `/?q=…`. Pages 2..N:
 `src/pages/page/[num].astro` and the EN twin. `pagination.ts` slices page windows.
 
@@ -16,7 +16,9 @@ pagination like a category. Categories stay in the rail and the phone strip. The
 ## Hero slider (`src/components/islands/HeroSlider.tsx`)
 
 A carousel track rotating up to three sets (Empfohlen / Aktuelles / Populär), all rendered side by side in
-`.hero-track`; the component translates the track by `-activeIndex * 100%` plus live drag pixels.
+`.hero-track`; the component translates the track by `-activeIndex * 100%` plus live drag pixels. One set renders as
+`islands/hero/HeroSlide.tsx`; the set names and words are `islands/hero/labels.ts`. The drag and pointer handling
+stays in `HeroSlider.tsx`, where `HeroSlider.test.tsx` reads it.
 
 **Populär** and the author pages' "Aufrufe" sort read `listReads()` (`/content/analytics/reads`, site key): page views per
 article over 90 days from the Besucher-Statistik, so only consented visitors count — a ranking, not an audience size.
@@ -61,6 +63,9 @@ strip, reading-progress bar, prev/next, and the consent-gated interest script (`
 - **Floating reading tools** (`.reader-tools`): zoom, focus mode, print. lg+: a column left of the text on a sticky
   anchor; below lg: a cluster bottom right above `--tds-bottom-lane` / `--tds-right-lane`. Zoom sets `--reader-zoom`
   on `<html>` (0.9–1.4, `reader_zoom`, pre-paint restore) and scales `.article-zoom` with CSS `zoom`.
+- **Behaviour lives in `src/lib/`:** `readerTools.ts` (`mountFocusMode`, `mountReaderZoom`) and `articleNav.ts`
+  (`mountArticleNav`: folding rail, collapsible sections, scroll spy, rail fade), called from `Article.astro`'s
+  scripts and tested in jsdom next to them.
 - Markdown bodies use `set:html` (admin-authored). If user content ever ships, sanitise.
 
 ## Reader focus mode
@@ -77,7 +82,7 @@ Wrappers over `src/components/PrintDoc.astro`, rendered `bare` + `noindex`, excl
 - `PrintControls` (a floating bar; on a phone a sticky bar with back · print · settings): page size A5/A4/A3 (a
   `size-<x>` class plus an injected `@page` rule), font size S/M/L (`--print-fs`), highlighting, and toggles for cover,
   category, summary, date, reading time, author, link, tags (cover off by default). Size, font and toggles persist in
-  localStorage.
+  localStorage. Its choices, paper geometry (`fitScale`, `pageRule`) and words sit in `islands/print/`.
 - **The sheet keeps its true size in mm** and is scaled to the screen with CSS `zoom` (`--print-scale`), never
   `max-width: 100%`. Views: Seite / Breite / 100 %.
 - **The preview is measured at true size:** `paginate()` lifts `zoom` while laying out; a heading moves to the next page

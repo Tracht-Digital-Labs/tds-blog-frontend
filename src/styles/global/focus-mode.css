@@ -1,0 +1,30 @@
+/* === Reader focus mode (html.focus-mode) ==========================
+   Distraction-free reading: strip all chrome + article extras, centre
+   the reading column. Restored pre-paint by the Layout head script;
+   toggled from the article header or the `f` key. Fully reversible. */
+html.focus-mode .blog-sidebar,
+html.focus-mode .brand-header,
+html.focus-mode .blog-footer,
+html.focus-mode .toc,
+html.focus-mode .tds-adslot,
+html.focus-mode .focus-hide {
+  display: none !important;
+}
+/* Drop the sidebar offset + centre the column at a comfortable measure. */
+html.focus-mode .with-sidebar,
+html.focus-mode .article-shell.has-toc,
+html.focus-mode .article-shell {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 1.25rem !important;
+  padding-right: 1.25rem !important;
+}
+html.focus-mode .article-col {
+  margin-left: auto;
+  margin-right: auto;
+}
+html.focus-mode #focus-toggle {
+  color: var(--color-accent);
+}
+/* The reading tools stay in focus mode — they are the way back out — fixed
+   in the bottom-right corner, so the text needs no margin for them. */

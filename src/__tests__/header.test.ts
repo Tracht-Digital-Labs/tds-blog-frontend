@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readSharedStyle } from "./sharedStyle";
+import { readStylesheet } from "./stylesheet";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -16,9 +18,8 @@ import { join } from "node:path";
  */
 
 const HEADER = join(process.cwd(), "src", "components", "JournalHeader.astro");
-const GLOBAL_CSS = join(process.cwd(), "src", "styles", "global.css");
 const raw = readFileSync(HEADER, "utf8");
-const css = readFileSync(GLOBAL_CSS, "utf8");
+const css = readStylesheet("global");
 
 /** This file documents the traps being pinned, so assert against code only. */
 const source = raw
@@ -135,7 +136,7 @@ describe("the property bar", () => {
 
   it("resolves the bar in the INSTALLED tds-shared", () => {
     const shared = join(process.cwd(), "node_modules", "@tracht-digital-labs", "tds-shared");
-    const primitives = readFileSync(join(shared, "styles", "primitives.css"), "utf8");
+    const primitives = readSharedStyle("primitives.css");
     expect(primitives).toContain(".tds-sitebar__wide");
     expect(primitives).toContain(".tds-sitebar__island");
     expect(readFileSync(join(shared, "styles", "surfaces", "blog.css"), "utf8")).toMatch(

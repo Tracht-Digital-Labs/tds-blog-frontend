@@ -1,10 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import { countHighlights, highlightRange, paginate, removeHighlights } from "./printPaginate";
+import { LABELS } from "./print/labels";
+import {
+  DEFAULTS,
+  FITS,
+  FONT_SIZES,
+  FS_KEY,
+  META_KEY,
+  ORDER,
+  PAGE_NAME,
+  SIZES,
+  SIZE_KEY,
+  type Fit,
+  type Fs,
+  type Key,
+  type Size,
+} from "./print/options";
+import { fitScale, pageRule } from "./print/sheet";
 
 /**
  * Screen-only control panel for the article print view (`/[slug]/print`) —
  * a floating panel on the right of a wide screen, a sticky bar on a phone
- * (see `.print-controls` in global.css). Choices persist in localStorage.
+ * (see `.print-controls` in `styles/global/print.css`). Choices persist in localStorage.
  * It drives:
  *
  *   • Page size (A5/A4/A3) — a `size-<x>` class on `#print-root` (the sheets
@@ -20,108 +37,6 @@ import { countHighlights, highlightRange, paginate, removeHighlights } from "./p
  *
  * The article body is baked server-side; this only flips visibility / sizing.
  */
-
-type Key = "cover" | "category" | "lead" | "date" | "reading" | "author" | "url" | "tags";
-type Size = "a5" | "a4" | "a3";
-type Fs = "s" | "m" | "l";
-type Fit = "page" | "width" | "actual";
-
-// Meta order follows the document's own top-to-bottom flow.
-const ORDER: Key[] = ["cover", "category", "lead", "date", "reading", "author", "url", "tags"];
-
-// Cover defaults off (it's the colourful brand geometry the print view strips);
-// everything textual defaults on.
-const DEFAULTS: Record<Key, boolean> = {
-  cover: false,
-  category: true,
-  lead: true,
-  date: true,
-  reading: true,
-  author: true,
-  url: true,
-  tags: true,
-};
-
-// Sorted small → large.
-const SIZES: Size[] = ["a5", "a4", "a3"];
-const PAGE_NAME: Record<Size, string> = { a5: "A5", a4: "A4", a3: "A3" };
-/** Paper size in mm — the sheets are laid out at this true size and then
- *  scaled to the screen, so A5/A4/A3 differ the way the paper does. */
-const PAGE_MM: Record<Size, [number, number]> = { a5: [148, 210], a4: [210, 297], a3: [297, 420] };
-const MM_TO_PX = 96 / 25.4;
-const PAGE_MARGIN = "16mm"; // Seitenabstand — mirrored by .print-page padding.
-/** The sheet's hard offset on screen (8px) plus a little air. */
-const SHEET_EXTRA = 12;
-
-const FONT_SIZES: Fs[] = ["s", "m", "l"];
-const FITS: Fit[] = ["page", "width", "actual"];
-
-const LABELS = {
-  de: {
-    back: "Zum Beitrag",
-    settings: "Einstellungen",
-    size: "Seitenformat",
-    font: "Schriftgröße",
-    fonts: { s: "Klein", m: "Mittel", l: "Groß" } as Record<Fs, string>,
-    view: "Ansicht",
-    fits: { page: "Seite", width: "Breite", actual: "100 %" } as Record<Fit, string>,
-    mark: "Markieren",
-    markMode: "Markier-Modus",
-    markHint: "Text auswählen, dann „Markieren“ tippen.",
-    unmark: "Markierung entfernen",
-    clear: "Alle Markierungen löschen",
-    meta: "Inhalte",
-    print: "Drucken / Als PDF",
-    scale: (pct: number) => `Vorschau in ${pct} % der Originalgröße`,
-    pages: (n: number) => (n === 1 ? "1 Seite" : `${n} Seiten`),
-    pageNo: (n: number, total: number) => `Seite ${n} von ${total}`,
-    pageNoCss: `"Seite " counter(page) " von " counter(pages)`,
-    items: {
-      cover: "Titelbild",
-      category: "Kategorie",
-      lead: "Kurzbeschreibung",
-      date: "Datum",
-      reading: "Lesezeit",
-      author: "Autor",
-      url: "Link zum Beitrag",
-      tags: "Themen",
-    } as Record<Key, string>,
-  },
-  en: {
-    back: "Back to article",
-    settings: "Settings",
-    size: "Page size",
-    font: "Font size",
-    fonts: { s: "Small", m: "Medium", l: "Large" } as Record<Fs, string>,
-    view: "View",
-    fits: { page: "Page", width: "Width", actual: "100%" } as Record<Fit, string>,
-    mark: "Highlight",
-    markMode: "Marker mode",
-    markHint: "Select text, then tap “Highlight”.",
-    unmark: "Remove highlight",
-    clear: "Clear all highlights",
-    meta: "Contents",
-    print: "Print / Save as PDF",
-    scale: (pct: number) => `Preview at ${pct}% of actual size`,
-    pages: (n: number) => (n === 1 ? "1 page" : `${n} pages`),
-    pageNo: (n: number, total: number) => `Page ${n} of ${total}`,
-    pageNoCss: `"Page " counter(page) " of " counter(pages)`,
-    items: {
-      cover: "Cover image",
-      category: "Category",
-      lead: "Summary",
-      date: "Date",
-      reading: "Reading time",
-      author: "Author",
-      url: "Article link",
-      tags: "Topics",
-    } as Record<Key, string>,
-  },
-};
-
-const META_KEY = "tds-print-meta";
-const SIZE_KEY = "tds-print-size";
-const FS_KEY = "tds-print-fs";
 
 const WIDE = "(min-width: 900px)";
 
@@ -210,10 +125,7 @@ export default function PrintControls({
       style.id = "tds-print-page";
       document.head.appendChild(style);
     }
-    style.textContent =
-      `@page { size: ${PAGE_NAME[size]}; margin: ${PAGE_MARGIN}; ` +
-      `@bottom-right { content: ${t.pageNoCss}; font-family: var(--font-body), sans-serif; ` +
-      `font-size: 8.25pt; color: #71717a; vertical-align: middle; } }`;
+    style.textContent = pageRule(size, t.pageNoCss);
 
     try {
       localStorage.setItem(SIZE_KEY, size);
@@ -229,18 +141,12 @@ export default function PrintControls({
     const stage = el?.parentElement;
     if (!el || !stage) return;
     const apply = () => {
-      const [wMm, hMm] = PAGE_MM[size];
-      const pageW = wMm * MM_TO_PX + SHEET_EXTRA;
-      const pageH = hMm * MM_TO_PX + SHEET_EXTRA;
       const availW = stage.clientWidth;
       // The phone's sticky bar sits over the top of the stage.
       const bar = barRef.current?.closest(".print-controls");
       const barH = bar && getComputedStyle(bar).position === "sticky" ? bar.getBoundingClientRect().height : 0;
       const availH = window.innerHeight - barH - 48;
-      let next = 1;
-      if (fit === "width") next = Math.min(1, availW / pageW);
-      else if (fit === "page") next = Math.min(1, availW / pageW, availH / pageH);
-      next = Math.max(0.2, next);
+      const next = fitScale(size, fit, availW, availH);
       el.style.setProperty("--print-scale", String(next));
       setScale(next);
     };

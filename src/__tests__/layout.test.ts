@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { readSharedStyle } from "./sharedStyle";
+import { readStylesheet } from "./stylesheet";
 
 /**
  * Layout posture tests.
@@ -20,7 +22,6 @@ import { join } from "node:path";
 // Anchored to the vitest root (the repo root), not to import.meta.url: under
 // the jsdom environment import.meta.url is not a file: URL.
 const SRC = join(process.cwd(), "src");
-const GLOBAL_CSS = join(SRC, "styles", "global.css");
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -32,7 +33,7 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 const sourceFiles = walk(SRC).filter((f) => /\.(astro|tsx|ts)$/.test(f) && !f.includes("__tests__"));
-const css = readFileSync(GLOBAL_CSS, "utf8");
+const css = readStylesheet("global");
 
 /**
  * Strip comments before asserting. These files document the very traps being
@@ -52,16 +53,9 @@ const codeOf = (file: string) => stripComments(readFileSync(file, "utf8"));
  * that reads global.css alone would pass or fail for the wrong reason.
  * What matters is the CSS the page actually gets.
  */
-const SHARED = join(
-  process.cwd(),
-  "node_modules",
-  "@tracht-digital-labs",
-  "tds-shared",
-  "styles",
-);
 const effectiveCss = [
   cssCode,
-  ...["base.css", "primitives.css", "prose.css", "surfaces/blog.css"].map((f) => codeOf(join(SHARED, f))),
+  ...["base.css", "primitives.css", "prose.css", "surfaces/blog.css"].map((f) => stripComments(readSharedStyle(f))),
 ].join("\n");
 
 describe("page shell", () => {
@@ -88,7 +82,7 @@ describe("page shell", () => {
     // The width comes from the blog SURFACE in tds-shared, which the tools site
     // and the shop render too; a local copy is how the three edges drift apart
     // again. The rail is the journal's alone and is set here.
-    expect(codeOf(join(SHARED, "surfaces", "blog.css"))).toMatch(/--tds-shell-max:\s*120rem/);
+    expect(stripComments(readSharedStyle("surfaces/blog.css"))).toMatch(/--tds-shell-max:\s*120rem/);
     expect(cssCode).not.toMatch(/--tds-shell-max:/);
     expect(cssCode).toContain("--tds-rail:");
   });

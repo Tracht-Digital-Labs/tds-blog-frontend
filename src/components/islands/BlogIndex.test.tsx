@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import BlogIndex, { type IndexPost } from "./BlogIndex";
+import type { IndexPost } from "~/lib/indexFilter";
+import BlogIndex from "./BlogIndex";
 
 /**
  * What this suite is here for: the index filters in place, and three things
